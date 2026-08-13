@@ -116,7 +116,21 @@ class TestRestockOrderEndpoints:
 
         calculated_total = sum(item["line_cost"] for item in order["items"])
         assert abs(order["total_cost"] - calculated_total) < 0.01
-        assert order["total_cost"] <= order["budget"]
+
+    def test_restock_order_may_exceed_its_budget(self, client):
+        """Test that a basket costing more than the budget is still accepted.
+
+        The budget seeds the recommendation but does not cap it: the user is
+        allowed to add items past it, so the endpoint must not reject them.
+        """
+        response = client.post("/api/restock-orders", json={
+            "budget": 100,
+            "items": [{"item_sku": "MTR-304", "quantity": 35}]
+        })
+        assert response.status_code == 201
+
+        order = response.json()
+        assert order["total_cost"] > order["budget"]
 
     def test_restock_order_lead_time_is_slowest_line(self, client, sample_restock_request):
         """Test that order lead time is the max of the line lead times, not the average."""

@@ -136,8 +136,8 @@ class RestockOrder(BaseModel):
 
     Deliberately NOT an Order: an Order is an outbound sale with a customer and its
     total_value is revenue, whereas a RestockOrder is inbound spend with no customer.
-    Merging them would corrupt every revenue and order-count aggregate. See
-    .agent/adr/0001-restock-orders-separate-from-sales-orders.md
+    Keeping them apart is what leaves the dashboard summary, the quarterly and
+    monthly reports, and the Orders status counts reading sales figures only.
     """
     id: str
     restock_number: str

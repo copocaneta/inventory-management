@@ -1,7 +1,6 @@
 <template>
   <div class="restocking">
     <div class="page-header">
-      <h2>{{ t('restocking.title') }}</h2>
       <p>{{ t('restocking.description') }}</p>
     </div>
 
@@ -24,110 +23,132 @@
         </router-link>
       </div>
 
-      <div class="card budget-card">
-        <div class="budget-header">
-          <div class="budget-label">{{ t('restocking.budget.label') }}</div>
-          <div class="budget-value">{{ formatCurrency(budget, currentCurrency) }}</div>
-        </div>
-        <input
-          type="range"
-          class="budget-slider"
-          :min="budgetMin"
-          :max="budgetMax"
-          :step="budgetStep"
-          v-model.number="budget"
-        />
-        <div v-if="budget >= budgetMax" class="budget-covers-all">
-          {{ t('restocking.budget.coversAll') }}
-        </div>
-        <div class="budget-stats">
-          <div class="budget-stat">
-            <div class="budget-stat-label">{{ t('restocking.budget.allocated') }}</div>
-            <div class="budget-stat-value">{{ formatCurrency(allocated, currentCurrency) }}</div>
-          </div>
-          <div class="budget-stat">
-            <div class="budget-stat-label">{{ t('restocking.budget.remaining') }}</div>
-            <div class="budget-stat-value">{{ formatCurrency(remaining, currentCurrency) }}</div>
-          </div>
-          <div class="budget-stat">
-            <div class="budget-stat-label">{{ t('restocking.budget.selectedItems') }}</div>
-            <div class="budget-stat-value">{{ selectedCount }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ t('restocking.table.title') }}</h3>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>{{ t('restocking.table.include') }}</th>
-                <th>{{ t('restocking.table.sku') }}</th>
-                <th>{{ t('restocking.table.itemName') }}</th>
-                <th>{{ t('restocking.table.trend') }}</th>
-                <th>{{ t('restocking.table.forecastedDemand') }}</th>
-                <th>{{ t('restocking.table.gap') }}</th>
-                <th>{{ t('restocking.table.quantity') }}</th>
-                <th>{{ t('restocking.table.unitCost') }}</th>
-                <th>{{ t('restocking.table.lineCost') }}</th>
-                <th>{{ t('restocking.table.leadTime') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="row in rankedRows"
-                :key="row.item_sku"
-                :class="{ 'row-selected': selectedSkus.has(row.item_sku), 'row-muted': !selectedSkus.has(row.item_sku) }"
-              >
-                <td>
-                  <input
-                    type="checkbox"
-                    :checked="selectedSkus.has(row.item_sku)"
-                    @change="toggleSelection(row.item_sku)"
-                  />
-                </td>
-                <td><strong>{{ row.item_sku }}</strong></td>
-                <td>
-                  {{ row.item_name }}
-                  <span v-if="!selectedSkus.has(row.item_sku)" class="badge over-budget-tag">
-                    {{ t('restocking.overBudget') }}
-                  </span>
-                </td>
-                <td>
-                  <span :class="['badge', row.trend]">
-                    {{ t(`trends.${row.trend}`) }}
-                  </span>
-                </td>
-                <td>{{ row.forecasted_demand }}</td>
-                <td>{{ row.gap > 0 ? '+' : '' }}{{ row.gap }}</td>
-                <td>{{ row.forecasted_demand }}</td>
-                <!-- Unit cost needs cents: rounding to whole dollars makes qty * unit price
-                     visibly not match the line cost shown next to it. -->
-                <td>{{ formatCurrencyWithDecimals(row.unit_cost, currentCurrency, 2) }}</td>
-                <td>{{ formatCurrency(row.line_cost, currentCurrency) }}</td>
-                <td>{{ t('restocking.days', { count: row.lead_time_days }) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="place-order-row">
-          <div v-if="submitError" class="error submit-error">{{ submitError }}</div>
-          <button
-            class="place-order-btn"
-            :disabled="selectedCount === 0 || placing"
-            @click="placeOrder"
-          >
-            {{ placing ? t('restocking.placingOrder') : t('restocking.placeOrder') }}
-          </button>
-          <span v-if="selectedCount === 0" class="nothing-selected-hint">
-            {{ t('restocking.nothingSelected') }}
+      <section class="section">
+        <div class="section-head">
+          <h3>{{ t('restocking.budget.label') }}</h3>
+          <span v-if="budget >= totalCost" class="section-note budget-covers-all">
+            {{ t('restocking.budget.coversAll') }}
           </span>
         </div>
-      </div>
+        <div class="card budget-card">
+          <div class="budget-header">
+            <div class="eyebrow">{{ t('restocking.budget.label') }}</div>
+            <div class="budget-value num">{{ formatCurrency(budget, currentCurrency) }}</div>
+          </div>
+          <input
+            type="range"
+            class="budget-slider"
+            :min="budgetMin"
+            :max="budgetMax"
+            :step="budgetStep"
+            v-model.number="budget"
+          />
+          <!-- Compare against the actual basket total, not the rounded-up budgetMax, since
+               budgetMax is padded to the next step multiple and could be reached before the
+               basket is actually fully covered. -->
+          <div class="budget-stats stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">{{ t('restocking.budget.allocated') }}</div>
+              <div class="stat-value num">{{ formatCurrency(allocated, currentCurrency) }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">{{ t('restocking.budget.remaining') }}</div>
+              <div class="stat-value num" :class="{ 'value-negative': remaining < 0 }">
+                {{ formatCurrency(remaining, currentCurrency) }}
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">{{ t('restocking.budget.selectedItems') }}</div>
+              <div class="stat-value num">{{ selectedCount }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h3>{{ t('restocking.table.title') }}</h3>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ t('restocking.table.include') }}</th>
+                  <th>{{ t('restocking.table.sku') }}</th>
+                  <th>{{ t('restocking.table.trend') }}</th>
+                  <th class="num">{{ t('restocking.table.forecastedDemand') }}</th>
+                  <th class="num">{{ t('restocking.table.gap') }}</th>
+                  <th class="num">{{ t('restocking.table.quantity') }}</th>
+                  <th class="num">{{ t('restocking.table.unitCost') }}</th>
+                  <th class="num">{{ t('restocking.table.lineCost') }}</th>
+                  <th>{{ t('restocking.table.leadTime') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="row in rankedRows"
+                  :key="row.item_sku"
+                  :class="{
+                    'row-selected': selectedSkus.has(row.item_sku),
+                    'row-muted': !selectedSkus.has(row.item_sku),
+                    'row-over-budget': !greedySelection.has(row.item_sku)
+                  }"
+                >
+                  <td>
+                    <input
+                      type="checkbox"
+                      :checked="selectedSkus.has(row.item_sku)"
+                      @change="toggleSelection(row.item_sku)"
+                    />
+                  </td>
+                  <td>
+                    <span class="cell-sku"><b>{{ row.item_sku }}</b></span>
+                    <span class="cell-name">
+                      {{ row.item_name }}
+                      <!-- Tag reflects affordability (greedySelection), not the checkbox state
+                           (selectedSkus). A row the user unchecked but the budget could still
+                           afford is not "over budget" - it's muted, tag-free. A row the user
+                           manually checked despite it not fitting the greedy walk is genuinely
+                           over budget once added, so the tag still applies. -->
+                      <span v-if="!greedySelection.has(row.item_sku)" class="badge danger over-budget-tag">
+                        {{ t('restocking.overBudget') }}
+                      </span>
+                    </span>
+                  </td>
+                  <td>
+                    <span :class="['badge', row.trend]">
+                      {{ t(`trends.${row.trend}`) }}
+                    </span>
+                  </td>
+                  <td class="num">{{ row.forecasted_demand }}</td>
+                  <td class="num">{{ row.gap > 0 ? '+' : '' }}{{ row.gap }}</td>
+                  <td class="num">{{ row.forecasted_demand }}</td>
+                  <!-- Unit cost needs cents: rounding to whole dollars makes qty * unit price
+                       visibly not match the line cost shown next to it. -->
+                  <td class="num">{{ formatCurrencyWithDecimals(row.unit_cost, currentCurrency, 2) }}</td>
+                  <td class="num">{{ formatCurrency(row.line_cost, currentCurrency) }}</td>
+                  <td class="lead-time">{{ t('restocking.days', { count: row.lead_time_days }) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="place-order-row">
+            <div v-if="submitError" class="error submit-error">{{ submitError }}</div>
+            <button
+              class="place-order-btn"
+              :disabled="selectedCount === 0 || placing"
+              @click="placeOrder"
+            >
+              {{ placing ? t('restocking.placingOrder') : t('restocking.placeOrder') }}
+            </button>
+            <span v-if="selectedCount === 0" class="nothing-selected-hint">
+              {{ t('restocking.nothingSelected') }}
+            </span>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -155,10 +176,20 @@ export default {
     const budgetMin = ref(0)
     const budgetMax = ref(0)
     const budgetStep = ref(1)
+    // Actual sum of every line cost in the basket. budgetMax is rounded UP to a step
+    // multiple (see loadForecasts) so the slider thumb can land on it, which means
+    // budgetMax can overshoot the real total - this is the true "covers everything" line.
+    const totalCost = ref(0)
 
     // Manual checkbox overrides, keyed by item_sku -> boolean. When present, this wins
     // over the greedy auto-selection for that row.
     const manualOverrides = ref({})
+
+    // True right after a successful submit, before the user expresses any new intent
+    // (moving the slider or toggling a row). While true, the table must show nothing
+    // selected and Place Order must stay disabled, so a second click can't silently
+    // resubmit the same basket as a duplicate order.
+    const justSubmitted = ref(false)
 
     const placing = ref(false)
     const submitError = ref(null)
@@ -207,8 +238,11 @@ export default {
     })
 
     // Effective selection: manual checkbox overrides win over the greedy default,
-    // until the slider moves and resets them (see watch below).
+    // until the slider moves and resets them (see watch below). Right after a submit,
+    // force this to empty regardless of overrides/greedy result, so the basket can't
+    // silently snap back to "everything checked" and enable a duplicate submit.
     const selectedSkus = computed(() => {
+      if (justSubmitted.value) return new Set()
       const result = new Set()
       for (const row of rankedRows.value) {
         const override = manualOverrides.value[row.item_sku]
@@ -219,6 +253,9 @@ export default {
     })
 
     const toggleSelection = (sku) => {
+      // Toggling a checkbox is a fresh intent, so it both clears the post-submit lock
+      // and applies the toggle in the same action.
+      justSubmitted.value = false
       const isCurrentlySelected = selectedSkus.value.has(sku)
       manualOverrides.value = { ...manualOverrides.value, [sku]: !isCurrentlySelected }
     }
@@ -238,6 +275,9 @@ export default {
     // surprising than resetting them.
     watch(budget, () => {
       manualOverrides.value = {}
+      // Moving the slider is also a fresh intent, so it clears the post-submit lock
+      // the same way a checkbox toggle does.
+      justSubmitted.value = false
     })
 
     const formatDate = (dateString) => {
@@ -260,11 +300,19 @@ export default {
         const data = await api.getDemandForecasts()
         forecasts.value = data
 
-        const totalCost = data.reduce((sum, f) => sum + f.forecasted_demand * f.unit_cost, 0)
+        const total = data.reduce((sum, f) => sum + f.forecasted_demand * f.unit_cost, 0)
+        totalCost.value = total
         budgetMin.value = 0
-        budgetMax.value = totalCost
-        budgetStep.value = roundToCleanStep(totalCost / 100)
-        budget.value = Math.round(totalCost * 0.5)
+        // A range input only lands on min + n*step, so if budgetMax were the raw total,
+        // the thumb could never actually reach it. Compute the clean step first, then
+        // round the max UP to the next whole multiple of that step so the far right of
+        // the track always exists and always covers the full basket.
+        const step = roundToCleanStep(total / 100)
+        budgetStep.value = step
+        budgetMax.value = Math.ceil(total / step) * step
+        // Snap the 50% default to a step multiple too, so the thumb position and the
+        // displayed figure agree on first paint instead of disagreeing until the user drags.
+        budget.value = Math.round((total * 0.5) / step) * step
       } catch (err) {
         error.value = 'Failed to load demand forecasts: ' + err.message
       } finally {
@@ -283,7 +331,13 @@ export default {
 
         const order = await api.createRestockOrder({ budget: budget.value, items })
         successInfo.value = order
+        // Clear the selection outright rather than just discarding overrides: overrides
+        // alone fall back to the greedy set, which would instantly re-check every row
+        // and leave Place Order enabled with an identical basket - a second click would
+        // silently submit a duplicate order. justSubmitted forces the table to show zero
+        // selected until the user expresses a new intent (slider move or checkbox toggle).
         manualOverrides.value = {}
+        justSubmitted.value = true
       } catch (err) {
         submitError.value = t('restocking.error') + (err.response?.data?.detail ? ': ' + err.response.data.detail : '')
       } finally {
@@ -302,7 +356,9 @@ export default {
       budgetMin,
       budgetMax,
       budgetStep,
+      totalCost,
       rankedRows,
+      greedySelection,
       selectedSkus,
       toggleSelection,
       allocated,
@@ -321,10 +377,18 @@ export default {
 </script>
 
 <style scoped>
+.section {
+  margin-bottom: var(--s10);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
 .budget-card {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--s5);
 }
 
 .budget-header {
@@ -333,92 +397,101 @@ export default {
   align-items: baseline;
 }
 
-.budget-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 .budget-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--t-2xl);
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .budget-slider {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  accent-color: #2563eb;
+  height: 6px;
+  background: var(--rule);
+  border-radius: 99px;
+  outline: none;
+}
+
+.budget-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  border: 2px solid var(--surface);
+  box-shadow: var(--e-1);
+  cursor: pointer;
+}
+
+.budget-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  border: 2px solid var(--surface);
+  cursor: pointer;
+}
+
+.budget-slider:focus-visible {
+  box-shadow: var(--ring);
 }
 
 .budget-covers-all {
-  font-size: 0.875rem;
-  color: #059669;
   font-weight: 600;
+  color: var(--mint);
 }
 
 .budget-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #f1f5f9;
+  margin-bottom: 0;
 }
 
-.budget-stat-label {
-  font-size: 0.75rem;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
-
-.budget-stat-value {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #0f172a;
+.value-negative {
+  color: var(--signal);
 }
 
 .row-selected {
-  background: #f0fdf4;
+  background: var(--surface-alt);
 }
 
 .row-muted {
   opacity: 0.55;
 }
 
+.row-over-budget {
+  background: var(--signal-soft);
+}
+
 .over-budget-tag {
-  margin-left: 0.5rem;
-  background: #fef2f2;
-  color: #991b1b;
+  margin-left: var(--s2);
 }
 
 .success-banner {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
+  background: var(--mint-soft);
+  border: 1px solid var(--mint);
+  border-radius: var(--r-sm);
+  padding: var(--s4) var(--s5);
+  margin-bottom: var(--s5);
 }
 
 .success-title {
   font-weight: 700;
-  color: #065f46;
-  margin-bottom: 0.25rem;
+  color: var(--ink);
+  margin-bottom: var(--s1);
 }
 
 .success-detail {
-  color: #166534;
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
+  color: var(--steel);
+  font-size: var(--t-md);
+  margin-bottom: var(--s2);
 }
 
 .success-link {
-  color: #2563eb;
+  color: var(--info);
   font-weight: 600;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: var(--t-md);
 }
 
 .success-link:hover {
@@ -428,39 +501,48 @@ export default {
 .place-order-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  gap: var(--s4);
+  margin-top: var(--s5);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--rule);
 }
 
 .place-order-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.625rem 1.5rem;
-  font-size: 0.938rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 10px var(--s5);
   font-weight: 600;
+  font-size: var(--t-md);
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .place-order-btn:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: var(--steel);
 }
 
 .place-order-btn:disabled {
-  background: #cbd5e1;
+  background: var(--rule-strong);
+  color: var(--surface);
   cursor: not-allowed;
 }
 
 .nothing-selected-hint {
-  color: #64748b;
-  font-size: 0.875rem;
+  color: var(--steel);
+  font-size: var(--t-md);
 }
 
 .submit-error {
   margin: 0;
+}
+
+.lead-time {
+  font-family: var(--mono);
+  color: var(--steel);
+}
+
+input[type='checkbox'] {
+  accent-color: var(--ink);
 }
 </style>
