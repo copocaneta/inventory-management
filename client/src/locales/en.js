@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Control',
@@ -14,6 +15,44 @@ export default {
     collapseSidebar: 'Collapse sidebar',
     expandSidebar: 'Expand sidebar',
     openMenu: 'Open menu'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Set a budget and order the forecast items it can cover.',
+    budget: {
+      label: 'Available Budget',
+      allocated: 'Allocated',
+      remaining: 'Remaining',
+      selectedItems: 'Items Selected',
+      coversAll: 'Covers every forecast item'
+    },
+    table: {
+      title: 'Restock Recommendations',
+      include: 'Include',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      trend: 'Trend',
+      forecastedDemand: 'Forecast (30d)',
+      gap: 'Demand Gap',
+      quantity: 'Order Qty',
+      unitCost: 'Unit Cost',
+      lineCost: 'Line Cost',
+      leadTime: 'Lead Time'
+    },
+    overBudget: 'Over budget',
+    recommended: 'Recommended',
+    days: '{count} days',
+    placeOrder: 'Place Order',
+    placingOrder: 'Placing order...',
+    nothingSelected: 'Select at least one item to place an order',
+    success: {
+      title: 'Restock order {number} submitted',
+      detail: '{count} items, {total}, expected {date}',
+      viewInOrders: 'View in Orders'
+    },
+    error: 'Failed to place restock order'
   },
 
   // Dashboard
@@ -112,6 +151,18 @@ export default {
     title: 'Orders',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
+    submittedOrders: 'Submitted Orders',
+    submittedOrdersEmpty: 'No restock orders submitted yet. Set a budget on the Restocking tab to place one.',
+    submittedTable: {
+      restockNumber: 'Restock #',
+      items: 'Items',
+      totalCost: 'Total Cost',
+      submitted: 'Submitted',
+      leadTime: 'Lead Time',
+      expectedDelivery: 'Expected Delivery',
+      status: 'Status'
+    },
+    leadTimeDays: '{count} days',
     totalOrders: 'Total Orders',
     totalRevenue: 'Total Revenue',
     avgOrderValue: 'Avg Order Value',
@@ -210,6 +261,7 @@ export default {
     shipped: 'Shipped',
     processing: 'Processing',
     backordered: 'Backordered',
+    submitted: 'Submitted',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
     adequate: 'Adequate'

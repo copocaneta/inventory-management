@@ -43,6 +43,18 @@ export const api = {
     return response.data
   },
 
+  async getRestockOrders() {
+    const response = await axios.get(`${API_BASE_URL}/restock-orders`)
+    return response.data
+  },
+
+  // Sends SKUs and quantities only. The server resolves name, unit cost and lead
+  // time from the demand forecast, so prices are never client-supplied.
+  async createRestockOrder({ budget, items }) {
+    const response = await axios.post(`${API_BASE_URL}/restock-orders`, { budget, items })
+    return response.data
+  },
+
   async getDashboardSummary(filters = {}) {
     const params = new URLSearchParams()
     if (filters.warehouse && filters.warehouse !== 'all') params.append('warehouse', filters.warehouse)

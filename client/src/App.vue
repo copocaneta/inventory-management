@@ -59,6 +59,16 @@
           <span>{{ t('nav.demandForecast') }}</span>
         </router-link>
 
+        <router-link to="/restocking" active-class="is-active" class="nav-link" :title="t('nav.restocking')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="7" width="10" height="7.5" rx="0.5" stroke-linejoin="round" />
+            <path d="M2 7L7 4L12 7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M13.5 2V9" stroke-linecap="round" />
+            <path d="M11 6.5L13.5 9L16 6.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>{{ t('nav.restocking') }}</span>
+        </router-link>
+
         <router-link to="/reports" active-class="is-active" class="nav-link" :title="t('nav.reports')">
           <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
             <path d="M4.5 1.75H10.5L13 4.25V15.25H4.5V1.75Z" stroke-linejoin="round" />
@@ -94,7 +104,10 @@
     <div class="main">
       <div class="page-head">
         <h1 class="page-title">{{ pageTitle }}</h1>
-        <FilterBar />
+        <!-- Restocking ignores all global filters (no warehouse/category/month/status
+             dimension on demand forecasts), so showing a FilterBar there would be a
+             control that silently does nothing - worse than no control at all. -->
+        <FilterBar v-if="$route.path !== '/restocking'" />
       </div>
       <main class="content">
         <router-view />
@@ -158,6 +171,7 @@ export default {
       '/orders': () => t('nav.orders'),
       '/spending': () => t('nav.finance'),
       '/demand': () => t('nav.demandForecast'),
+      '/restocking': () => t('nav.restocking'),
       '/reports': () => t('nav.reports')
     }
     const pageTitle = computed(() => {

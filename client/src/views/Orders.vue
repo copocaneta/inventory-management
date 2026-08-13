@@ -27,6 +27,70 @@
         </div>
       </div>
 
+      <!--
+        Restock orders (procurement, inbound, no customer) are deliberately kept in
+        their own ref/table separate from sales `orders` (outbound revenue to a
+        customer). Merging them would corrupt getOrdersByStatus()/stat cards above,
+        which must only ever count sales orders, and would incorrectly apply the
+        warehouse/category/status/period filters (restock orders have none of those
+        dimensions).
+      -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ restockOrders.length }})</h3>
+        </div>
+        <div v-if="restockError" class="error">{{ restockError }}</div>
+        <div v-else-if="restockOrders.length === 0" class="submitted-orders-empty">
+          {{ t('orders.submittedOrdersEmpty') }}
+        </div>
+        <div v-else class="table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.submittedTable.restockNumber') }}</th>
+                <th class="col-items">{{ t('orders.submittedTable.items') }}</th>
+                <th class="col-value">{{ t('orders.submittedTable.totalCost') }}</th>
+                <th class="col-date">{{ t('orders.submittedTable.submitted') }}</th>
+                <th class="col-date">{{ t('orders.submittedTable.leadTime') }}</th>
+                <th class="col-date">{{ t('orders.submittedTable.expectedDelivery') }}</th>
+                <th class="col-status">{{ t('orders.submittedTable.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in restockOrders" :key="order.id || order.restock_number">
+                <td class="col-order-number"><strong>{{ order.restock_number }}</strong></td>
+                <td class="col-items">
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="item in order.items" :key="item.item_sku" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.item_name) }}</span>
+                        <!-- Unit cost needs cents here even though totals elsewhere on this
+                             page round to whole dollars: rounding a per-unit price hides real
+                             cents and makes qty * unit price look inconsistent with total_cost. -->
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ formatCurrencyWithDecimals(item.unit_cost, currentCurrency, 2) }}</span>
+                        <span class="item-meta">{{ t('orders.submittedTable.leadTime') }}: {{ t('orders.leadTimeDays', { count: item.lead_time_days }) }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td class="col-value"><strong>{{ formatCurrency(order.total_cost, currentCurrency) }}</strong></td>
+                <td class="col-date">{{ formatDate(order.submitted_date) }}</td>
+                <!-- order.lead_time_days is the MAX across item lead times, not an
+                     average: the order isn't complete until the slowest item lands -->
+                <td class="col-date">{{ t('orders.leadTimeDays', { count: order.lead_time_days }) }}</td>
+                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-status">
+                  <span class="badge info">{{ t('status.submitted') }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
@@ -83,6 +147,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrency, formatCurrencyWithDecimals } from '../utils/currency'
 
 export default {
   name: 'Orders',
@@ -95,6 +160,11 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+
+    // Restock orders (procurement) are kept separate from sales `orders` (revenue).
+    // See template comment above the Submitted Orders card for why.
+    const restockOrders = ref([])
+    const restockError = ref(null)
 
     // Use shared filters
     const {
@@ -129,6 +199,17 @@ export default {
       loadOrders()
     })
 
+    // Restock orders have no warehouse/category/status/period dimension, so they
+    // are not part of the global filters watch above and are loaded once on mount.
+    const loadRestockOrders = async () => {
+      try {
+        restockOrders.value = await api.getRestockOrders()
+      } catch (err) {
+        // Keep this failure independent so the All Orders table still renders
+        restockError.value = 'Failed to load submitted orders: ' + err.message
+      }
+    }
+
     const getOrdersByStatus = (status) => {
       return orders.value.filter(order => order.status === status)
     }
@@ -153,16 +234,24 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    onMounted(() => {
+      loadOrders()
+      loadRestockOrders()
+    })
 
     return {
       t,
       loading,
       error,
       orders,
+      restockOrders,
+      restockError,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
+      formatCurrency,
+      formatCurrencyWithDecimals,
+      currentCurrency,
       currencySymbol,
       translateProductName,
       translateCustomerName
@@ -275,5 +364,12 @@ export default {
 .item-meta {
   font-size: 0.813rem;
   color: #64748b;
+}
+
+.submitted-orders-empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 </style>
