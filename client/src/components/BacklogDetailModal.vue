@@ -14,60 +14,56 @@
 
           <div class="modal-body">
             <div class="shortage-header">
-              <div class="shortage-icon">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <path d="M24 8L24 28M24 34L24 36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                  <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="3"/>
-                </svg>
-              </div>
               <div class="shortage-title-section">
+                <div class="eyebrow">{{ backlogItem.item_sku }}</div>
                 <h4 class="item-name">{{ translateProductName(backlogItem.item_name) }}</h4>
-                <div class="item-sku">SKU: {{ backlogItem.item_sku }}</div>
               </div>
-              <span class="priority-badge" :class="backlogItem.priority">
+              <span class="badge" :class="backlogItem.priority">
                 {{ backlogItem.priority }} Priority
               </span>
             </div>
 
             <div class="shortage-summary">
               <div class="summary-card danger">
-                <div class="summary-label">Shortage Amount</div>
-                <div class="summary-value">{{ shortage }} units</div>
+                <div class="eyebrow">Shortage Amount</div>
+                <div class="summary-value num">{{ shortage }} units</div>
               </div>
               <div class="summary-card warning">
-                <div class="summary-label">Days Delayed</div>
-                <div class="summary-value">{{ backlogItem.days_delayed }} days</div>
+                <div class="eyebrow">Days Delayed</div>
+                <div class="summary-value num">{{ backlogItem.days_delayed }} days</div>
               </div>
             </div>
 
             <div class="info-grid">
               <div class="info-item">
-                <div class="info-label">Order ID</div>
-                <div class="info-value order-id">{{ backlogItem.order_id }}</div>
+                <div class="eyebrow">Order ID</div>
+                <div class="info-value num">{{ backlogItem.order_id }}</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Item SKU</div>
-                <div class="info-value sku">{{ backlogItem.item_sku }}</div>
+                <div class="eyebrow">Item SKU</div>
+                <div class="info-value">
+                  <span class="cell-sku"><b>{{ backlogItem.item_sku }}</b></span>
+                </div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Quantity Needed</div>
-                <div class="info-value">{{ backlogItem.quantity_needed }} units</div>
+                <div class="eyebrow">Quantity Needed</div>
+                <div class="info-value num">{{ backlogItem.quantity_needed }} units</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Quantity Available</div>
-                <div class="info-value">{{ backlogItem.quantity_available }} units</div>
+                <div class="eyebrow">Quantity Available</div>
+                <div class="info-value num">{{ backlogItem.quantity_available }} units</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Expected Date</div>
+                <div class="eyebrow">Expected Date</div>
                 <div class="info-value">{{ formatDate(backlogItem.expected_date) }}</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Status</div>
+                <div class="eyebrow">Status</div>
                 <div class="info-value">
                   <span class="badge danger">Backordered</span>
                 </div>
@@ -126,24 +122,22 @@ const formatDate = (dateString) => {
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgba(16, 20, 24, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--s4);
   z-index: 2000;
-  padding: 1rem;
 }
 
 .modal-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-  max-width: 700px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  box-shadow: var(--e-3);
   width: 100%;
+  max-width: 700px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
@@ -151,216 +145,154 @@ const formatDate = (dateString) => {
 }
 
 .modal-header {
+  padding: var(--s5) var(--s6);
+  border-bottom: 1px solid var(--rule);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  gap: var(--s4);
 }
 
 .modal-title {
-  font-size: 1.25rem;
+  font-family: var(--display);
+  font-size: var(--t-lg);
   font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 
 .close-button {
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  color: var(--steel);
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-alt);
+  color: var(--ink);
 }
 
 .modal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
+  padding: var(--s6);
 }
 
 .shortage-header {
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 1.5rem;
-}
-
-.shortage-icon {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-bottom: var(--s5);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s5);
 }
 
 .shortage-title-section {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
 }
 
 .item-name {
-  font-size: 1.5rem;
+  font-family: var(--display);
+  font-size: var(--t-xl);
   font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.5rem 0;
-}
-
-.item-sku {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-family: 'Monaco', 'Courier New', monospace;
-}
-
-.priority-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  flex-shrink: 0;
-}
-
-.priority-badge.high {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.priority-badge.medium {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.priority-badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+  color: var(--ink);
 }
 
 .shortage-summary {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: var(--s4);
+  margin-bottom: var(--s6);
 }
 
 .summary-card {
-  padding: 1.25rem;
-  border-radius: 10px;
-  border: 2px solid;
+  padding: var(--s4);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--rule-strong);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
 }
 
 .summary-card.danger {
-  border-color: #fecaca;
-  background: #fef2f2;
+  background: var(--signal-soft);
+  border-color: var(--signal);
 }
 
 .summary-card.warning {
-  border-color: #fed7aa;
-  background: #fffbeb;
-}
-
-.summary-label {
-  font-size: 0.813rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
-  margin-bottom: 0.5rem;
+  background: var(--amber-soft);
+  border-color: var(--amber);
 }
 
 .summary-value {
-  font-size: 1.875rem;
+  font-size: var(--t-2xl);
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .summary-card.danger .summary-value {
-  color: #dc2626;
+  color: var(--signal);
 }
 
 .summary-card.warning .summary-value {
-  color: #f59e0b;
+  color: var(--amber-ink);
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  gap: var(--s5);
 }
 
 .info-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-.info-label {
-  font-size: 0.813rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
+  gap: var(--s2);
 }
 
 .info-value {
-  font-size: 0.938rem;
-  color: #0f172a;
+  font-size: var(--t-base);
+  color: var(--ink);
   font-weight: 500;
-}
-
-.info-value.order-id,
-.info-value.sku {
-  font-family: 'Monaco', 'Courier New', monospace;
-  color: #2563eb;
 }
 
 .modal-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  padding: var(--s5) var(--s6);
+  border-top: 1px solid var(--rule);
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--s3);
 }
 
 .btn-secondary {
-  padding: 0.625rem 1.25rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  padding: 8px var(--s4);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--t-md);
   font-weight: 500;
-  font-size: 0.875rem;
-  color: #334155;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
+  transition: border-color 0.12s ease;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  border-color: var(--ink);
 }
 
-/* Modal transition animations */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.16s ease;
 }
 
 .modal-enter-from,
@@ -370,11 +302,11 @@ const formatDate = (dateString) => {
 
 .modal-enter-active .modal-container,
 .modal-leave-active .modal-container {
-  transition: transform 0.2s ease;
+  transition: transform 0.16s ease;
 }
 
 .modal-enter-from .modal-container,
 .modal-leave-to .modal-container {
-  transform: scale(0.95);
+  transform: translateY(4px);
 }
 </style>

@@ -1,7 +1,6 @@
 <template>
   <div class="reports">
     <div class="page-header">
-      <h2>Performance Reports</h2>
       <p>View quarterly performance metrics and monthly trends</p>
     </div>
 
@@ -9,28 +8,28 @@
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
       <!-- Quarterly Performance -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Quarterly Performance</h3>
+      <section class="card">
+        <div class="section-head">
+          <h3>Quarterly Performance</h3>
         </div>
         <div class="table-container">
           <table class="reports-table">
             <thead>
               <tr>
                 <th>Quarter</th>
-                <th>Total Orders</th>
-                <th>Total Revenue</th>
-                <th>Avg Order Value</th>
-                <th>Fulfillment Rate</th>
+                <th class="align-right">Total Orders</th>
+                <th class="align-right">Total Revenue</th>
+                <th class="align-right">Avg Order Value</th>
+                <th class="align-right">Fulfillment Rate</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(q, index) in quarterlyData" :key="index">
-                <td><strong>{{ q.quarter }}</strong></td>
-                <td>{{ q.total_orders }}</td>
-                <td>${{ formatNumber(q.total_revenue) }}</td>
-                <td>${{ formatNumber(q.avg_order_value) }}</td>
-                <td>
+                <td class="mono-label"><strong>{{ q.quarter }}</strong></td>
+                <td class="align-right"><span class="num">{{ q.total_orders }}</span></td>
+                <td class="align-right"><span class="num">${{ formatNumber(q.total_revenue) }}</span></td>
+                <td class="align-right"><span class="num">${{ formatNumber(q.avg_order_value) }}</span></td>
+                <td class="align-right">
                   <span :class="getFulfillmentClass(q.fulfillment_rate)">
                     {{ q.fulfillment_rate }}%
                   </span>
@@ -39,12 +38,12 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       <!-- Monthly Trends Chart -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Monthly Revenue Trend</h3>
+      <section class="card">
+        <div class="section-head">
+          <h3>Monthly Revenue Trend</h3>
         </div>
         <div class="chart-container">
           <div class="bar-chart">
@@ -52,57 +51,58 @@
               <div class="bar-container">
                 <div
                   class="bar"
+                  :class="{ 'bar-max': isMaxRevenue(month.revenue) }"
                   :style="{ height: getBarHeight(month.revenue) + 'px' }"
                   :title="'$' + formatNumber(month.revenue)"
                 ></div>
               </div>
-              <div class="bar-label">{{ formatMonth(month.month) }}</div>
+              <div class="bar-label">{{ formatMonthShort(month.month) }}</div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Month-over-Month Comparison -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Month-over-Month Analysis</h3>
+      <section class="card">
+        <div class="section-head">
+          <h3>Month-over-Month Analysis</h3>
         </div>
         <div class="table-container">
           <table class="reports-table">
             <thead>
               <tr>
                 <th>Month</th>
-                <th>Orders</th>
-                <th>Revenue</th>
-                <th>Change</th>
-                <th>Growth Rate</th>
+                <th class="align-right">Orders</th>
+                <th class="align-right">Revenue</th>
+                <th class="align-right">Change</th>
+                <th class="align-right">Growth Rate</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(month, index) in monthlyData" :key="index">
-                <td><strong>{{ formatMonth(month.month) }}</strong></td>
-                <td>{{ month.order_count }}</td>
-                <td>${{ formatNumber(month.revenue) }}</td>
-                <td>
-                  <span v-if="index > 0" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
+                <td class="mono-label"><strong>{{ formatMonth(month.month) }}</strong></td>
+                <td class="align-right"><span class="num">{{ month.order_count }}</span></td>
+                <td class="align-right"><span class="num">${{ formatNumber(month.revenue) }}</span></td>
+                <td class="align-right">
+                  <span v-if="index > 0" class="num" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
                     {{ getChangeValue(month.revenue, monthlyData[index - 1].revenue) }}
                   </span>
-                  <span v-else>-</span>
+                  <span v-else class="num">-</span>
                 </td>
-                <td>
-                  <span v-if="index > 0" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
+                <td class="align-right">
+                  <span v-if="index > 0" class="num" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
                     {{ getGrowthRate(month.revenue, monthlyData[index - 1].revenue) }}
                   </span>
-                  <span v-else>-</span>
+                  <span v-else class="num">-</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       <!-- Summary Stats -->
-      <div class="stats-grid">
+      <section class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Total Revenue (YTD)</div>
           <div class="stat-value">${{ formatNumber(totalRevenue) }}</div>
@@ -119,7 +119,7 @@
           <div class="stat-label">Best Performing Quarter</div>
           <div class="stat-value">{{ bestQuarter }}</div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -250,6 +250,27 @@ export default {
       return monthNames[monthIndex] + ' ' + year
     },
 
+    // Presentational helper: three-letter month abbreviation for the bar chart
+    // x-axis (labels stay horizontal, so the fuller "Mon YYYY" form doesn't fit).
+    formatMonthShort(monthStr) {
+      var parts = monthStr.split('-')
+      var month = parts[1]
+      var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      var monthIndex = parseInt(month) - 1
+      return monthNames[monthIndex]
+    },
+
+    // Presentational helper: highlights the single tallest bar in the revenue chart.
+    isMaxRevenue(revenue) {
+      var maxRevenue = 0
+      for (var i = 0; i < this.monthlyData.length; i++) {
+        if (this.monthlyData[i].revenue > maxRevenue) {
+          maxRevenue = this.monthlyData[i].revenue
+        }
+      }
+      return maxRevenue > 0 && revenue === maxRevenue
+    },
+
     getBarHeight(revenue) {
       console.log('Calculating bar height for revenue:', revenue)
       // Calculate bar height (max height 200px)
@@ -319,23 +340,17 @@ export default {
   padding: 0;
 }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.reports section + section,
+.reports .stats-grid {
+  margin-top: var(--s10);
 }
 
-.card-header {
-  margin-bottom: 1.5rem;
+.align-right {
+  text-align: right;
 }
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
+.mono-label {
+  font-family: var(--mono);
 }
 
 .reports-table {
@@ -344,25 +359,24 @@ export default {
 }
 
 .reports-table th {
-  background: #f8fafc;
-  padding: 0.75rem;
+  padding: var(--s3) var(--s4);
   text-align: left;
   font-weight: 600;
-  color: #64748b;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--steel);
+  border-bottom: 1px solid var(--rule-strong);
 }
 
 .reports-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--rule);
 }
 
 .reports-table tr:hover {
-  background: #f8fafc;
+  background: var(--surface-alt);
 }
 
 .chart-container {
-  padding: 2rem 1rem;
+  padding: var(--s8) var(--s4);
   min-height: 300px;
 }
 
@@ -371,7 +385,7 @@ export default {
   align-items: flex-end;
   justify-content: space-around;
   height: 250px;
-  gap: 0.5rem;
+  gap: var(--s2);
 }
 
 .bar-wrapper {
@@ -391,96 +405,57 @@ export default {
 
 .bar {
   width: 100%;
-  background: linear-gradient(to top, #3b82f6, #60a5fa);
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s;
+  background: var(--ink);
+  border-radius: 2px 2px 0 0;
+  transition: background 0.2s;
   cursor: pointer;
 }
 
 .bar:hover {
-  background: linear-gradient(to top, #2563eb, #3b82f6);
+  background: var(--steel);
+}
+
+.bar.bar-max {
+  background: var(--amber);
+}
+
+.bar.bar-max:hover {
+  background: var(--steel);
 }
 
 .bar-label {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  color: #64748b;
+  margin-top: var(--s3);
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--steel-soft);
+  letter-spacing: 0.04em;
   text-align: center;
-  transform: rotate(-45deg);
   white-space: nowrap;
-  margin-top: 1.5rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #3b82f6;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.badge.success {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badge.warning {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.danger {
-  background: #fee2e2;
-  color: #991b1b;
 }
 
 .positive-change {
-  color: #16a34a;
+  color: var(--mint);
+  font-family: var(--mono);
   font-weight: 600;
 }
 
 .negative-change {
-  color: #dc2626;
+  color: var(--signal);
+  font-family: var(--mono);
   font-weight: 600;
 }
 
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--steel);
 }
 
 .error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
+  background: var(--signal-soft);
+  color: var(--signal);
+  padding: var(--s4);
+  border-radius: var(--r-md);
+  margin: var(--s4) 0;
 }
 </style>

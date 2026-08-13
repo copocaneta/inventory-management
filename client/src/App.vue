@@ -1,5 +1,11 @@
 <template>
-  <div class="shell" :class="{ 'is-collapsed': sidebarCollapsed }">
+  <div class="shell" :class="{ 'is-collapsed': sidebarCollapsed, 'drawer-open': drawerOpen }">
+    <div
+      v-if="drawerOpen"
+      class="sidebar-backdrop"
+      @click="drawerOpen = false"
+    ></div>
+
     <aside class="sidebar">
       <div class="brand">
         <span class="brand-mark">{{ t('nav.companyName') }}</span>
@@ -103,6 +109,18 @@
 
     <div class="main">
       <div class="page-head">
+        <button
+          class="page-hamburger"
+          @click="drawerOpen = !drawerOpen"
+          :aria-label="t('nav.openMenu')"
+          :aria-expanded="drawerOpen"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M3 5.5H17" stroke-linecap="round" />
+            <path d="M3 10H17" stroke-linecap="round" />
+            <path d="M3 14.5H17" stroke-linecap="round" />
+          </svg>
+        </button>
         <h1 class="page-title">{{ pageTitle }}</h1>
         <!-- Restocking ignores all global filters (no warehouse/category/month/status
              dimension on demand forecasts), so showing a FilterBar there would be a
@@ -131,7 +149,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from './api'
 import { useAuth } from './composables/useAuth'
@@ -164,6 +182,26 @@ export default {
       sidebarCollapsed.value = !sidebarCollapsed.value
       localStorage.setItem('app-sidebar-collapsed', String(sidebarCollapsed.value))
     }
+
+    const drawerOpen = ref(false)
+    const handleDrawerKeydown = (event) => {
+      if (event.key === 'Escape') {
+        drawerOpen.value = false
+      }
+    }
+    watch(drawerOpen, (isOpen) => {
+      if (isOpen) {
+        window.addEventListener('keydown', handleDrawerKeydown)
+      } else {
+        window.removeEventListener('keydown', handleDrawerKeydown)
+      }
+    })
+    watch(() => route.path, () => {
+      drawerOpen.value = false
+    })
+    onBeforeUnmount(() => {
+      window.removeEventListener('keydown', handleDrawerKeydown)
+    })
 
     const pageTitleMap = {
       '/': () => t('nav.overview'),
@@ -251,6 +289,7 @@ export default {
       pageTitle,
       sidebarCollapsed,
       toggleSidebar,
+      drawerOpen,
       showProfileDetails,
       showTasks,
       tasks,
@@ -441,58 +480,103 @@ export default {
   display: none;
 }
 
-/* ---------- responsive ---------- */
+.page-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: var(--s3);
+  border-radius: var(--r-sm);
+  color: var(--steel);
+  transition: background 0.12s ease, color 0.12s ease;
+}
 
-@media (max-width: 860px) {
+.page-hamburger:hover {
+  background: #f2f0ec;
+  color: var(--ink);
+}
+
+/* ---------- responsive: 861px - 1200px, forced icon rail ---------- */
+
+@media (max-width: 1200px) and (min-width: 861px) {
   .shell {
-    grid-template-columns: 1fr;
+    --sidebar-w: var(--sidebar-w-rail);
   }
 
-  .sidebar {
-    position: static;
-    height: auto;
-    flex-direction: row;
-    align-items: center;
-    border-right: none;
-    border-bottom: 1px solid var(--rule);
-    overflow-x: auto;
-    gap: var(--s4);
+  .nav-link {
+    justify-content: center;
+    padding: 9px;
+    margin: 0 var(--s1);
   }
 
-  .nav-group {
-    display: flex;
-    flex-direction: row;
-    gap: var(--s1);
-    padding: 0;
-  }
-
+  .nav-link span,
+  .brand-sub,
   .nav-group-label {
     display: none;
   }
 
-  .nav-link {
-    white-space: nowrap;
-  }
-
-  .nav-link.is-active::before {
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: -1px;
-    width: auto;
-    height: 2px;
-    border-radius: 0;
+  .collapse-toggle {
+    display: none;
   }
 
   .sidebar-foot {
-    margin-top: 0;
-    padding: 0;
-    flex-direction: row;
-    border-top: none;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+}
+
+/* ---------- responsive: below 860px, off-canvas drawer ---------- */
+
+@media (max-width: 860px) {
+  .shell {
+    grid-template-columns: 1fr;
+    --sidebar-w: 248px;
   }
 
-  .collapse-toggle {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 300;
+  }
+
+  .shell.drawer-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* the drawer always shows full labels, even if the rail preference is stored */
+  .shell.is-collapsed .sidebar .nav-link {
+    justify-content: flex-start;
+    padding: 9px var(--s3);
+    margin: 0;
+  }
+
+  .shell.is-collapsed .sidebar .nav-link span,
+  .shell.is-collapsed .sidebar .brand-sub,
+  .shell.is-collapsed .sidebar .nav-group-label {
+    display: revert;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 20, 24, 0.45);
+    z-index: 290;
+  }
+
+  .collapse-toggle,
+  .shell.is-collapsed .collapse-toggle {
     display: none;
+  }
+
+  .page-hamburger {
+    display: inline-flex;
   }
 
   .page-head,

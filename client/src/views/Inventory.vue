@@ -1,16 +1,16 @@
 <template>
   <div class="inventory">
     <div class="page-header">
-      <h2>{{ t('inventory.title') }}</h2>
       <p>{{ t('inventory.description') }}</p>
     </div>
 
     <div v-if="loading" class="loading">{{ t('common.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ t('inventory.stockLevels') }} ({{ filteredItems.length }} {{ t('inventory.skus') }})</h3>
+      <section class="stock-section">
+        <div class="section-head">
+          <h3>{{ t('inventory.stockLevels') }}</h3>
+          <span class="eyebrow">{{ filteredItems.length }} {{ t('inventory.skus') }}</span>
           <div class="search-box">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
@@ -38,13 +38,11 @@
             <thead>
               <tr>
                 <th>{{ t('inventory.table.sku') }}</th>
-                <th>{{ t('inventory.table.itemName') }}</th>
                 <th>{{ t('inventory.table.category') }}</th>
-                <th>{{ t('inventory.table.quantityOnHand') }}</th>
-                <th>{{ t('inventory.table.reorderPoint') }}</th>
-                <th>{{ t('inventory.table.unitCost') }}</th>
-                <th>{{ t('inventory.table.totalValue') }}</th>
-                <th>{{ t('inventory.table.location') }}</th>
+                <th class="align-right">{{ t('inventory.table.quantityOnHand') }}</th>
+                <th class="align-right">{{ t('inventory.table.reorderPoint') }}</th>
+                <th class="align-right">{{ t('inventory.table.unitCost') }}</th>
+                <th class="align-right">{{ t('inventory.table.totalValue') }}</th>
                 <th>{{ t('inventory.table.status') }}</th>
               </tr>
             </thead>
@@ -55,14 +53,17 @@
                 class="clickable-row"
                 @click="showItemDetail(item)"
               >
-                <td><strong>{{ item.sku }}</strong></td>
-                <td>{{ translateProductName(item.name) }}</td>
+                <td>
+                  <span class="cell-sku"><b>{{ item.sku }}</b><span>{{ translateWarehouse(item.location) }}</span></span>
+                  <span class="cell-name">{{ translateProductName(item.name) }}</span>
+                </td>
                 <td>{{ translateCategory(item.category) }}</td>
-                <td><strong>{{ item.quantity_on_hand }}</strong></td>
-                <td>{{ item.reorder_point }}</td>
-                <td>{{ currencySymbol }}{{ item.unit_cost.toFixed(2) }}</td>
-                <td><strong>{{ currencySymbol }}{{ (item.quantity_on_hand * item.unit_cost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</strong></td>
-                <td>{{ translateWarehouse(item.location) }}</td>
+                <td class="align-right">
+                  <span :class="['qty', { low: item.quantity_on_hand <= item.reorder_point }]">{{ item.quantity_on_hand }}</span>
+                </td>
+                <td class="align-right"><span class="num">{{ item.reorder_point }}</span></td>
+                <td class="align-right"><span class="num">{{ currencySymbol }}{{ item.unit_cost.toFixed(2) }}</span></td>
+                <td class="align-right"><span class="num">{{ currencySymbol }}{{ (item.quantity_on_hand * item.unit_cost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</span></td>
                 <td>
                   <span :class="['badge', getStockStatusClass(item)]">
                     {{ getStockStatus(item) }}
@@ -72,7 +73,7 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
 
     <InventoryDetailModal
@@ -225,115 +226,87 @@ export default {
 </script>
 
 <style scoped>
-.page-header {
-  margin-bottom: 1.5rem;
+.stock-section {
+  margin-bottom: var(--s10);
 }
 
-.page-header h2 {
-  margin-bottom: 0.25rem;
+.stock-section .section-head {
+  flex-wrap: wrap;
 }
 
-.page-header p {
-  color: #64748b;
-  font-size: 0.875rem;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
+.align-right {
+  text-align: right;
 }
 
 .search-box {
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 300px;
+  min-width: 280px;
+  margin-left: var(--s5);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+}
+
+.search-box:focus-within {
+  border-color: var(--ink);
+  box-shadow: var(--ring);
 }
 
 .search-icon {
   position: absolute;
-  left: 0.75rem;
-  width: 18px;
-  height: 18px;
-  color: #94a3b8;
+  left: var(--s3);
+  width: 14px;
+  height: 14px;
+  color: var(--steel-soft);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #0f172a;
-  background: #f8fafc;
-  transition: all 0.2s;
+  padding: 6px var(--s8) 6px var(--s8);
+  border: none;
+  font-size: var(--t-md);
+  color: var(--ink);
+  background: transparent;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-input::placeholder {
-  color: #94a3b8;
+  color: var(--steel-soft);
 }
 
 .clear-search {
   position: absolute;
-  right: 0.5rem;
+  right: var(--s2);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  color: #94a3b8;
+  padding: 2px;
+  color: var(--steel-soft);
   cursor: pointer;
-  transition: all 0.2s;
 }
 
 .clear-search:hover {
-  background: #e2e8f0;
-  color: #64748b;
+  color: var(--steel);
 }
 
 .clear-search svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
-.loading,
 .error {
-  padding: 2rem;
+  padding: var(--s6);
   text-align: center;
-  color: #64748b;
-}
-
-.error {
-  color: #ef4444;
+  color: var(--signal);
 }
 
 .clickable-row {
   cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.clickable-row:hover {
-  background: #eff6ff !important;
 }
 </style>

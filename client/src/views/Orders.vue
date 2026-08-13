@@ -1,14 +1,13 @@
 <template>
   <div class="orders">
     <div class="page-header">
-      <h2>{{ t('orders.title') }}</h2>
       <p>{{ t('orders.description') }}</p>
     </div>
 
     <div v-if="loading" class="loading">{{ t('common.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
-      <div class="stats-grid">
+      <section class="stats-grid">
         <div class="stat-card success">
           <div class="stat-label">{{ t('status.delivered') }}</div>
           <div class="stat-value">{{ getOrdersByStatus('Delivered').length }}</div>
@@ -25,7 +24,7 @@
           <div class="stat-label">{{ t('status.backordered') }}</div>
           <div class="stat-value">{{ getOrdersByStatus('Backordered').length }}</div>
         </div>
-      </div>
+      </section>
 
       <!--
         Restock orders (procurement, inbound, no customer) are deliberately kept in
@@ -35,9 +34,10 @@
         warehouse/category/status/period filters (restock orders have none of those
         dimensions).
       -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ restockOrders.length }})</h3>
+      <section class="card">
+        <div class="section-head">
+          <h3>{{ t('orders.submittedOrders') }}</h3>
+          <span class="section-note">{{ restockOrders.length }}</span>
         </div>
         <div v-if="restockError" class="error">{{ restockError }}</div>
         <div v-else-if="restockOrders.length === 0" class="submitted-orders-empty">
@@ -58,7 +58,7 @@
             </thead>
             <tbody>
               <tr v-for="order in restockOrders" :key="order.id || order.restock_number">
-                <td class="col-order-number"><strong>{{ order.restock_number }}</strong></td>
+                <td class="col-order-number num">{{ order.restock_number }}</td>
                 <td class="col-items">
                   <details class="items-details">
                     <summary class="items-summary">
@@ -76,12 +76,12 @@
                     </div>
                   </details>
                 </td>
-                <td class="col-value"><strong>{{ formatCurrency(order.total_cost, currentCurrency) }}</strong></td>
-                <td class="col-date">{{ formatDate(order.submitted_date) }}</td>
+                <td class="col-value num">{{ formatCurrency(order.total_cost, currentCurrency) }}</td>
+                <td class="col-date num">{{ formatDate(order.submitted_date) }}</td>
                 <!-- order.lead_time_days is the MAX across item lead times, not an
                      average: the order isn't complete until the slowest item lands -->
                 <td class="col-date">{{ t('orders.leadTimeDays', { count: order.lead_time_days }) }}</td>
-                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-date num">{{ formatDate(order.expected_delivery) }}</td>
                 <td class="col-status">
                   <span class="badge info">{{ t('status.submitted') }}</span>
                 </td>
@@ -89,11 +89,12 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
+      <section class="card">
+        <div class="section-head">
+          <h3>{{ t('orders.allOrders') }}</h3>
+          <span class="section-note">{{ orders.length }}</span>
         </div>
         <div class="table-container">
           <table class="orders-table">
@@ -110,7 +111,7 @@
             </thead>
             <tbody>
               <tr v-for="order in orders" :key="order.id">
-                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-order-number num">{{ order.order_number }}</td>
                 <td class="col-customer">{{ translateCustomerName(order.customer) }}</td>
                 <td class="col-items">
                   <details class="items-details">
@@ -130,14 +131,14 @@
                     {{ t(`status.${order.status.toLowerCase()}`) }}
                   </span>
                 </td>
-                <td class="col-date">{{ formatDate(order.order_date) }}</td>
-                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
-                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+                <td class="col-date num">{{ formatDate(order.order_date) }}</td>
+                <td class="col-date num">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-value num">{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -261,6 +262,10 @@ export default {
 </script>
 
 <style scoped>
+section + section {
+  margin-top: var(--s10);
+}
+
 /* Fixed table layout to prevent column shifting */
 .orders-table {
   table-layout: fixed;
@@ -292,6 +297,11 @@ export default {
   width: 120px;
 }
 
+.col-value,
+.col-date {
+  text-align: right;
+}
+
 /* Items details styling */
 .items-details {
   position: relative;
@@ -299,8 +309,9 @@ export default {
 
 .items-summary {
   cursor: pointer;
-  color: #3b82f6;
-  font-weight: 500;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--steel);
   list-style: none;
   user-select: none;
   display: inline-block;
@@ -323,8 +334,7 @@ export default {
 }
 
 .items-summary:hover {
-  color: #2563eb;
-  text-decoration: underline;
+  color: var(--ink);
 }
 
 /* Dropdown container */
@@ -332,12 +342,12 @@ export default {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 0.5rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 0.75rem;
+  margin-top: var(--s2);
+  background: var(--surface-alt);
+  border: 1px solid var(--rule);
+  border-top: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: var(--s3);
   z-index: 10;
   min-width: 300px;
   max-width: 400px;
@@ -346,9 +356,9 @@ export default {
 .item-entry {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  gap: var(--s1);
+  padding: var(--s2);
+  border-bottom: 1px solid var(--rule);
 }
 
 .item-entry:last-child {
@@ -356,20 +366,20 @@ export default {
 }
 
 .item-name {
-  font-size: 0.875rem;
+  font-size: var(--t-md);
   font-weight: 500;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .item-meta {
-  font-size: 0.813rem;
-  color: #64748b;
+  font-size: var(--t-sm);
+  color: var(--steel);
 }
 
 .submitted-orders-empty {
-  padding: 3rem 1.5rem;
+  padding: var(--s12) var(--s6);
   text-align: center;
-  color: #64748b;
-  font-size: 0.9rem;
+  color: var(--steel);
+  font-size: var(--t-md);
 }
 </style>
