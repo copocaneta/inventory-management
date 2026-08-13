@@ -35,14 +35,14 @@ fi
 # Fallback: kill any remaining processes on the ports
 echo -e "${YELLOW}Cleaning up any remaining processes...${NC}"
 
-# Kill processes on port 8001 (backend)
-BACKEND_PIDS=$(lsof -ti:8001 2>/dev/null || true)
+# Kill processes on port 8090 (backend)
+BACKEND_PIDS=$(lsof -ti:8090 2>/dev/null || true)
 if [ ! -z "$BACKEND_PIDS" ]; then
     echo "$BACKEND_PIDS" | xargs kill 2>/dev/null || true
 fi
 
-# Kill processes on port 3000 (frontend)
-FRONTEND_PIDS=$(lsof -ti:3000 2>/dev/null || true)
+# Kill processes on port 3030 (frontend)
+FRONTEND_PIDS=$(lsof -ti:3030 2>/dev/null || true)
 if [ ! -z "$FRONTEND_PIDS" ]; then
     echo "$FRONTEND_PIDS" | xargs kill 2>/dev/null || true
 fi

@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 ```bash
 # From server directory
 uv run python main.py
-# Server runs on http://localhost:8001
-# API docs at http://localhost:8001/docs
+# Server runs on http://localhost:8090
+# API docs at http://localhost:8090/docs
 ```
 
 ## Development Best Practices
@@ -168,7 +168,7 @@ def get_item(item_id: str):
 
 **Using FastAPI Docs:**
 1. Start server
-2. Navigate to http://localhost:8001/docs
+2. Navigate to http://localhost:8090/docs
 3. Click endpoint to expand
 4. Click "Try it out"
 5. Fill in parameters
@@ -280,7 +280,7 @@ server/
 ## Quick Reference
 
 **Start server:** `uv run python main.py`
-**API docs:** http://localhost:8001/docs
+**API docs:** http://localhost:8090/docs
 **Run tests:** `cd ../tests && uv run pytest backend/ -v`
 **Add endpoint:** Define model → Add route → Write tests
 **Add filter:** Add query param → Check 'all' value → Filter data

@@ -1,42 +1,136 @@
 <template>
-  <div class="app">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="logo">
-          <h1>{{ t('nav.companyName') }}</h1>
-          <span class="subtitle">{{ t('nav.subtitle') }}</span>
-        </div>
-        <nav class="nav-tabs">
-          <router-link to="/" :class="{ active: $route.path === '/' }">
-            {{ t('nav.overview') }}
-          </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
-            {{ t('nav.inventory') }}
-          </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
-            {{ t('nav.orders') }}
-          </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
-            {{ t('nav.finance') }}
-          </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
-            {{ t('nav.demandForecast') }}
-          </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
-          </router-link>
-        </nav>
-        <LanguageSwitcher />
+  <div class="shell" :class="{ 'is-collapsed': sidebarCollapsed, 'drawer-open': drawerOpen }">
+    <div
+      v-if="drawerOpen"
+      class="sidebar-backdrop"
+      @click="drawerOpen = false"
+    ></div>
+
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">{{ t('nav.companyName') }}</span>
+        <span class="brand-sub">{{ t('nav.subtitle') }}</span>
+      </div>
+
+      <nav class="nav-group">
+        <span class="nav-group-label eyebrow">{{ t('nav.groupFloor') }}</span>
+
+        <router-link to="/" exact-active-class="is-active" class="nav-link" :title="t('nav.overview')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="2" width="5.5" height="5.5" rx="0.5" />
+            <rect x="9.5" y="2" width="5.5" height="5.5" rx="0.5" />
+            <rect x="2" y="9.5" width="5.5" height="5.5" rx="0.5" />
+            <rect x="9.5" y="9.5" width="5.5" height="5.5" rx="0.5" />
+          </svg>
+          <span>{{ t('nav.overview') }}</span>
+        </router-link>
+
+        <router-link to="/inventory" active-class="is-active" class="nav-link" :title="t('nav.inventory')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M8.5 2L14.5 5.25V11.75L8.5 15L2.5 11.75V5.25L8.5 2Z" stroke-linejoin="round" />
+            <path d="M2.5 5.25L8.5 8.5L14.5 5.25" stroke-linejoin="round" />
+            <path d="M8.5 8.5V15" />
+          </svg>
+          <span>{{ t('nav.inventory') }}</span>
+        </router-link>
+
+        <router-link to="/orders" active-class="is-active" class="nav-link" :title="t('nav.orders')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="3.5" y="3" width="10" height="12" rx="1" />
+            <rect x="6" y="1.75" width="5" height="2.5" rx="0.5" />
+            <path d="M6 8H11" stroke-linecap="round" />
+            <path d="M6 10.75H11" stroke-linecap="round" />
+            <path d="M6 13.5H9" stroke-linecap="round" />
+          </svg>
+          <span>{{ t('nav.orders') }}</span>
+        </router-link>
+      </nav>
+
+      <nav class="nav-group">
+        <span class="nav-group-label eyebrow">{{ t('nav.groupAnalysis') }}</span>
+
+        <router-link to="/spending" active-class="is-active" class="nav-link" :title="t('nav.finance')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M8.5 1.75V15.25" stroke-linecap="round" />
+            <path d="M11.75 4.5C11.75 3.25 10.25 2.75 8.5 2.75C6.75 2.75 5.25 3.5 5.25 4.85C5.25 7.75 11.75 6.25 11.75 9.15C11.75 10.5 10.25 11.25 8.5 11.25C6.75 11.25 5.25 10.75 5.25 9.5" stroke-linecap="round" />
+          </svg>
+          <span>{{ t('nav.finance') }}</span>
+        </router-link>
+
+        <router-link to="/demand" active-class="is-active" class="nav-link" :title="t('nav.demandForecast')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M2 12.5L6.5 8L9.5 11L15 5.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11 5.5H15V9.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>{{ t('nav.demandForecast') }}</span>
+        </router-link>
+
+        <router-link to="/restocking" active-class="is-active" class="nav-link" :title="t('nav.restocking')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="7" width="10" height="7.5" rx="0.5" stroke-linejoin="round" />
+            <path d="M2 7L7 4L12 7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M13.5 2V9" stroke-linecap="round" />
+            <path d="M11 6.5L13.5 9L16 6.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>{{ t('nav.restocking') }}</span>
+        </router-link>
+
+        <router-link to="/reports" active-class="is-active" class="nav-link" :title="t('nav.reports')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M4.5 1.75H10.5L13 4.25V15.25H4.5V1.75Z" stroke-linejoin="round" />
+            <path d="M10.5 1.75V4.25H13" stroke-linejoin="round" />
+            <path d="M6.5 8H11" stroke-linecap="round" />
+            <path d="M6.5 10.5H11" stroke-linecap="round" />
+            <path d="M6.5 13H9" stroke-linecap="round" />
+          </svg>
+          <span>{{ t('nav.reports') }}</span>
+        </router-link>
+      </nav>
+
+      <div class="sidebar-foot">
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
           @show-tasks="showTasks = true"
         />
+        <LanguageSwitcher />
+        <button
+          class="collapse-toggle"
+          @click="toggleSidebar"
+          :aria-label="sidebarCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')"
+          :title="sidebarCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="2.5" width="12" height="11" rx="1" />
+            <path d="M6.5 2.5V13.5" />
+          </svg>
+        </button>
       </div>
-    </header>
-    <FilterBar />
-    <main class="main-content">
-      <router-view />
-    </main>
+    </aside>
+
+    <div class="main">
+      <div class="page-head">
+        <button
+          class="page-hamburger"
+          @click="drawerOpen = !drawerOpen"
+          :aria-label="t('nav.openMenu')"
+          :aria-expanded="drawerOpen"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M3 5.5H17" stroke-linecap="round" />
+            <path d="M3 10H17" stroke-linecap="round" />
+            <path d="M3 14.5H17" stroke-linecap="round" />
+          </svg>
+        </button>
+        <h1 class="page-title">{{ pageTitle }}</h1>
+        <!-- Restocking ignores all global filters (no warehouse/category/month/status
+             dimension on demand forecasts), so showing a FilterBar there would be a
+             control that silently does nothing - worse than no control at all. -->
+        <FilterBar v-if="$route.path !== '/restocking'" />
+      </div>
+      <main class="content">
+        <router-view />
+      </main>
+    </div>
 
     <ProfileDetailsModal
       :is-open="showProfileDetails"
@@ -55,7 +149,8 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { api } from './api'
 import { useAuth } from './composables/useAuth'
 import { useI18n } from './composables/useI18n'
@@ -77,9 +172,50 @@ export default {
   setup() {
     const { currentUser } = useAuth()
     const { t } = useI18n()
+    const route = useRoute()
     const showProfileDetails = ref(false)
     const showTasks = ref(false)
     const apiTasks = ref([])
+
+    const sidebarCollapsed = ref(localStorage.getItem('app-sidebar-collapsed') === 'true')
+    const toggleSidebar = () => {
+      sidebarCollapsed.value = !sidebarCollapsed.value
+      localStorage.setItem('app-sidebar-collapsed', String(sidebarCollapsed.value))
+    }
+
+    const drawerOpen = ref(false)
+    const handleDrawerKeydown = (event) => {
+      if (event.key === 'Escape') {
+        drawerOpen.value = false
+      }
+    }
+    watch(drawerOpen, (isOpen) => {
+      if (isOpen) {
+        window.addEventListener('keydown', handleDrawerKeydown)
+      } else {
+        window.removeEventListener('keydown', handleDrawerKeydown)
+      }
+    })
+    watch(() => route.path, () => {
+      drawerOpen.value = false
+    })
+    onBeforeUnmount(() => {
+      window.removeEventListener('keydown', handleDrawerKeydown)
+    })
+
+    const pageTitleMap = {
+      '/': () => t('nav.overview'),
+      '/inventory': () => t('nav.inventory'),
+      '/orders': () => t('nav.orders'),
+      '/spending': () => t('nav.finance'),
+      '/demand': () => t('nav.demandForecast'),
+      '/restocking': () => t('nav.restocking'),
+      '/reports': () => t('nav.reports')
+    }
+    const pageTitle = computed(() => {
+      const resolver = pageTitleMap[route.path]
+      return resolver ? resolver() : ''
+    })
 
     // Merge mock tasks from currentUser with API tasks
     const tasks = computed(() => {
@@ -150,6 +286,10 @@ export default {
 
     return {
       t,
+      pageTitle,
+      sidebarCollapsed,
+      toggleSidebar,
+      drawerOpen,
       showProfileDetails,
       showTasks,
       tasks,
@@ -161,326 +301,313 @@ export default {
 }
 </script>
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.app {
-  display: flex;
-  flex-direction: column;
+<style scoped>
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
   min-height: 100vh;
 }
 
-.top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+.sidebar {
   position: sticky;
   top: 0;
-  z-index: 100;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s6);
+  padding: var(--s6) 0 var(--s4);
+  background: var(--surface);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
 }
 
-.nav-container {
-  max-width: 1600px;
-  margin: 0 auto;
+.brand {
+  padding: 0 var(--s5);
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.brand-mark::before {
+  content: '';
+  width: 5px;
+  height: 19px;
+  background: var(--amber);
+  border-radius: 1px;
+}
+
+.brand-sub {
+  display: block;
+  margin-top: var(--s2);
+  padding-left: 13px;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--steel-soft);
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 var(--s3);
+}
+
+.nav-group-label {
+  padding: 0 var(--s3) var(--s2);
+}
+
+.nav-link {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 0 2rem;
-  height: 70px;
-}
-
-.nav-container > .nav-tabs {
-  margin-left: auto;
-  margin-right: 1rem;
-}
-
-.nav-container > .language-switcher {
-  margin-right: 1rem;
-}
-
-.logo {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.logo h1 {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
-}
-
-.subtitle {
-  font-size: 0.813rem;
-  color: #64748b;
-  font-weight: 400;
-  padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.nav-tabs a {
-  padding: 0.625rem 1.25rem;
-  color: #64748b;
-  text-decoration: none;
+  gap: var(--s3);
+  padding: 9px var(--s3);
+  border-radius: var(--r-sm);
+  color: var(--steel);
+  font-size: 13.5px;
   font-weight: 500;
-  font-size: 0.938rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  position: relative;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-.nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+.nav-link svg {
+  flex-shrink: 0;
 }
 
-.nav-tabs a.active {
-  color: #2563eb;
-  background: #eff6ff;
+.nav-link:hover {
+  background: #f2f0ec;
+  color: var(--ink);
 }
 
-.nav-tabs a.active::after {
+.nav-link.is-active {
+  background: var(--amber-soft);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.nav-link.is-active::before {
   content: '';
   position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #2563eb;
+  left: -12px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  background: var(--amber);
+  border-radius: 0 2px 2px 0;
 }
 
-.main-content {
-  flex: 1;
-  max-width: 1600px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 1.5rem 2rem;
-}
-
-.page-header {
-  margin-bottom: 1.5rem;
-}
-
-.page-header h2 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.375rem;
-  letter-spacing: -0.025em;
-}
-
-.page-header p {
-  color: #64748b;
-  font-size: 0.938rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card {
-  background: white;
-  padding: 1.25rem;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-}
-
-.stat-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.stat-label {
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.625rem;
-}
-
-.stat-value {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
-}
-
-.stat-card.warning .stat-value {
-  color: #ea580c;
-}
-
-.stat-card.success .stat-value {
-  color: #059669;
-}
-
-.stat-card.danger .stat-value {
-  color: #dc2626;
-}
-
-.stat-card.info .stat-value {
-  color: #2563eb;
-}
-
-.card {
-  background: white;
-  border-radius: 10px;
-  padding: 1.25rem;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 1.25rem;
-}
-
-.card-header {
+.sidebar-foot {
+  margin-top: auto;
+  padding: var(--s4) var(--s5) 0;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: var(--s3);
+  border-top: 1px solid var(--rule);
+}
+
+.collapse-toggle {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  justify-content: center;
+  align-self: flex-start;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  color: var(--steel);
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-.card-title {
-  font-size: 1.125rem;
+.collapse-toggle:hover {
+  background: #f2f0ec;
+  color: var(--ink);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.page-head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s6) var(--s8) var(--s4);
+}
+
+.page-title {
+  font-family: var(--display);
+  font-size: var(--t-2xl);
   font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  margin-bottom: var(--s4);
 }
 
-.table-container {
-  overflow-x: auto;
-}
-
-table {
+.content {
+  padding: var(--s8);
+  max-width: var(--content-max);
   width: 100%;
-  border-collapse: collapse;
 }
 
-thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+/* ---------- collapsed rail ---------- */
+
+.shell.is-collapsed {
+  --sidebar-w: var(--sidebar-w-rail);
 }
 
-th {
-  text-align: left;
-  padding: 0.5rem 0.75rem;
-  font-weight: 600;
-  color: #475569;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.is-collapsed .nav-link {
+  justify-content: center;
+  padding: 9px;
+  margin: 0 var(--s1);
 }
 
-td {
-  padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
-  font-size: 0.875rem;
+.is-collapsed .nav-link span,
+.is-collapsed .brand-sub,
+.is-collapsed .nav-group-label {
+  display: none;
 }
 
-tbody tr {
-  transition: background-color 0.15s ease;
+/* In the rail the wordmark has nowhere to go, so it reduces to the amber tick
+   from .brand-mark::before. font-size:0 drops the text without dropping the
+   pseudo-element, which carries its own width and height. */
+.is-collapsed .brand {
+  display: flex;
+  justify-content: center;
+  padding: 0;
 }
 
-tbody tr:hover {
-  background: #f8fafc;
+.is-collapsed .brand-mark {
+  font-size: 0;
+  gap: 0;
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.313rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+.page-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: var(--s3);
+  border-radius: var(--r-sm);
+  color: var(--steel);
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-.badge.success {
-  background: #d1fae5;
-  color: #065f46;
+.page-hamburger:hover {
+  background: #f2f0ec;
+  color: var(--ink);
 }
 
-.badge.warning {
-  background: #fed7aa;
-  color: #92400e;
+/* ---------- responsive: 861px - 1200px, forced icon rail ---------- */
+
+@media (max-width: 1200px) and (min-width: 861px) {
+  .shell {
+    --sidebar-w: var(--sidebar-w-rail);
+  }
+
+  .nav-link {
+    justify-content: center;
+    padding: 9px;
+    margin: 0 var(--s1);
+  }
+
+  .nav-link span,
+  .brand-sub,
+  .nav-group-label {
+    display: none;
+  }
+
+  .brand {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .brand-mark {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .collapse-toggle {
+    display: none;
+  }
+
+  .sidebar-foot {
+    flex-direction: column;
+    gap: var(--s2);
+  }
 }
 
-.badge.danger {
-  background: #fecaca;
-  color: #991b1b;
-}
+/* ---------- responsive: below 860px, off-canvas drawer ---------- */
 
-.badge.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
+@media (max-width: 860px) {
+  .shell {
+    grid-template-columns: 1fr;
+    --sidebar-w: 248px;
+  }
 
-.badge.increasing {
-  background: #d1fae5;
-  color: #065f46;
-}
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 300;
+  }
 
-.badge.decreasing {
-  background: #fecaca;
-  color: #991b1b;
-}
+  .shell.drawer-open .sidebar {
+    transform: translateX(0);
+  }
 
-.badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
-}
+  /* the drawer always shows full labels, even if the rail preference is stored */
+  .shell.is-collapsed .sidebar .nav-link {
+    justify-content: flex-start;
+    padding: 9px var(--s3);
+    margin: 0;
+  }
 
-.badge.high {
-  background: #fecaca;
-  color: #991b1b;
-}
+  .shell.is-collapsed .sidebar .nav-link span,
+  .shell.is-collapsed .sidebar .brand-sub,
+  .shell.is-collapsed .sidebar .nav-group-label {
+    display: revert;
+  }
 
-.badge.medium {
-  background: #fed7aa;
-  color: #92400e;
-}
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 20, 24, 0.45);
+    z-index: 290;
+  }
 
-.badge.low {
-  background: #dbeafe;
-  color: #1e40af;
-}
+  .collapse-toggle,
+  .shell.is-collapsed .collapse-toggle {
+    display: none;
+  }
 
-.loading {
-  text-align: center;
-  padding: 3rem;
-  color: #64748b;
-  font-size: 0.938rem;
-}
+  .page-hamburger {
+    display: inline-flex;
+  }
 
-.error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-  font-size: 0.938rem;
+  .page-head,
+  .content {
+    padding-left: var(--s5);
+    padding-right: var(--s5);
+  }
 }
 </style>

@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
+from datetime import datetime, timedelta
 from pydantic import BaseModel
-from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, restock_orders
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -89,6 +90,8 @@ class DemandForecast(BaseModel):
     forecasted_demand: int
     trend: str
     period: str
+    unit_cost: float
+    lead_time_days: int
 
 class BacklogItem(BaseModel):
     id: str
@@ -119,6 +122,40 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockOrderItem(BaseModel):
+    item_sku: str
+    item_name: str
+    quantity: int
+    unit_cost: float
+    lead_time_days: int
+    line_cost: float
+
+class RestockOrder(BaseModel):
+    """An inbound replenishment order placed against a budget.
+
+    Deliberately NOT an Order: an Order is an outbound sale with a customer and its
+    total_value is revenue, whereas a RestockOrder is inbound spend with no customer.
+    Keeping them apart is what leaves the dashboard summary, the quarterly and
+    monthly reports, and the Orders status counts reading sales figures only.
+    """
+    id: str
+    restock_number: str
+    items: List[RestockOrderItem]
+    total_cost: float
+    budget: float
+    submitted_date: str
+    expected_delivery: str
+    lead_time_days: int
+    status: str
+
+class CreateRestockOrderItem(BaseModel):
+    item_sku: str
+    quantity: int
+
+class CreateRestockOrderRequest(BaseModel):
+    budget: float
+    items: List[CreateRestockOrderItem]
 
 # API endpoints
 @app.get("/")
@@ -165,6 +202,74 @@ def get_order(order_id: str):
 def get_demand_forecasts():
     """Get demand forecasts"""
     return demand_forecasts
+
+@app.get("/api/restock-orders", response_model=List[RestockOrder])
+def get_restock_orders():
+    """Get all submitted restock orders, newest first"""
+    return list(reversed(restock_orders))
+
+@app.post("/api/restock-orders", response_model=RestockOrder, status_code=201)
+def create_restock_order(request: CreateRestockOrderRequest):
+    """Submit a restock order built from demand forecast lines.
+
+    The client sends SKUs and quantities only. Name, unit cost and lead time are
+    resolved here from the demand forecast so a client cannot invent prices.
+
+    The order is NOT rejected for exceeding its budget: the budget seeds the
+    recommendation, but the user is allowed to amend the basket past it.
+    """
+    if request.budget < 0:
+        raise HTTPException(status_code=400, detail="Budget must be zero or greater")
+
+    if not request.items:
+        raise HTTPException(status_code=400, detail="A restock order must contain at least one item")
+
+    lines = []
+    for requested in request.items:
+        if requested.quantity <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Quantity for {requested.item_sku} must be greater than zero"
+            )
+
+        forecast = next(
+            (f for f in demand_forecasts if f["item_sku"] == requested.item_sku),
+            None
+        )
+        if not forecast:
+            raise HTTPException(
+                status_code=400,
+                detail=f"No demand forecast found for SKU {requested.item_sku}"
+            )
+
+        lines.append({
+            "item_sku": forecast["item_sku"],
+            "item_name": forecast["item_name"],
+            "quantity": requested.quantity,
+            "unit_cost": forecast["unit_cost"],
+            "lead_time_days": forecast["lead_time_days"],
+            "line_cost": round(requested.quantity * forecast["unit_cost"], 2)
+        })
+
+    # The order is only complete once the slowest line lands, so the order-level
+    # lead time is the max across lines rather than a sum or an average.
+    order_lead_time = max(line["lead_time_days"] for line in lines)
+    submitted_at = datetime.now()
+
+    restock_order = {
+        "id": str(len(restock_orders) + 1),
+        "restock_number": f"RST-{submitted_at.year}-{len(restock_orders) + 1:04d}",
+        "items": lines,
+        "total_cost": round(sum(line["line_cost"] for line in lines), 2),
+        "budget": request.budget,
+        "submitted_date": submitted_at.isoformat(timespec="seconds"),
+        "expected_delivery": (submitted_at + timedelta(days=order_lead_time)).isoformat(timespec="seconds"),
+        "lead_time_days": order_lead_time,
+        "status": "Submitted"
+    }
+
+    restock_orders.append(restock_order)
+    return restock_order
 
 @app.get("/api/backlog", response_model=List[BacklogItem])
 def get_backlog():
@@ -306,4 +411,4 @@ def get_monthly_trends():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8090)

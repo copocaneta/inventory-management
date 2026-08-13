@@ -14,78 +14,71 @@
 
           <div class="modal-body">
             <div class="item-header">
-              <div class="item-icon" :class="getStockIconClass()">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <rect x="8" y="12" width="32" height="28" rx="2" stroke="currentColor" stroke-width="2.5"/>
-                  <path d="M16 8V16M32 8V16M8 20H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                  <path d="M16 28H32M16 34H24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-              </div>
               <div class="item-title-section">
+                <div class="eyebrow">{{ inventoryItem.sku }}</div>
                 <h4 class="item-name">{{ translateProductName(inventoryItem.name) }}</h4>
-                <div class="item-sku">SKU: {{ inventoryItem.sku }}</div>
               </div>
-              <span class="stock-badge" :class="getStockStatusClass()">
+              <span class="badge" :class="getStockStatusClass()">
                 {{ getStockStatus() }}
               </span>
             </div>
 
             <div class="stock-summary">
               <div class="summary-card primary">
-                <div class="summary-label">Quantity on Hand</div>
-                <div class="summary-value">{{ inventoryItem.quantity_on_hand }} units</div>
+                <div class="eyebrow">Quantity on Hand</div>
+                <div class="summary-value num">{{ inventoryItem.quantity_on_hand }} units</div>
               </div>
               <div class="summary-card" :class="getSummaryCardClass()">
-                <div class="summary-label">Stock Level</div>
-                <div class="summary-value">{{ stockPercentage }}%</div>
+                <div class="eyebrow">Stock Level</div>
+                <div class="summary-value num">{{ stockPercentage }}%</div>
                 <div class="summary-subtitle">vs. reorder point</div>
               </div>
             </div>
 
             <div class="info-grid">
               <div class="info-item">
-                <div class="info-label">Category</div>
+                <div class="eyebrow">Category</div>
                 <div class="info-value">{{ inventoryItem.category }}</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Location</div>
+                <div class="eyebrow">Location</div>
                 <div class="info-value">{{ inventoryItem.location }}</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Reorder Point</div>
-                <div class="info-value">{{ inventoryItem.reorder_point }} units</div>
+                <div class="eyebrow">Reorder Point</div>
+                <div class="info-value num">{{ inventoryItem.reorder_point }} units</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Units Remaining</div>
+                <div class="eyebrow">Units Remaining</div>
                 <div class="info-value">
-                  <span :style="{ color: inventoryItem.quantity_on_hand <= inventoryItem.reorder_point ? '#ef4444' : '#10b981' }">
+                  <span class="num" :class="inventoryItem.quantity_on_hand <= inventoryItem.reorder_point ? 'qty low' : 'qty'">
                     {{ inventoryItem.quantity_on_hand - inventoryItem.reorder_point }} units
                   </span>
                 </div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Unit Cost</div>
-                <div class="info-value">{{ currencySymbol }}{{ inventoryItem.unit_cost.toFixed(2) }}</div>
+                <div class="eyebrow">Unit Cost</div>
+                <div class="info-value num">{{ currencySymbol }}{{ inventoryItem.unit_cost.toFixed(2) }}</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Total Value</div>
-                <div class="info-value total-value">
+                <div class="eyebrow">Total Value</div>
+                <div class="info-value total-value num">
                   {{ currencySymbol }}{{ totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
                 </div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Warehouse</div>
-                <div class="info-value">{{ translateWarehouse(inventoryItem.location) }}</div>
+                <div class="eyebrow">Warehouse</div>
+                <div class="info-value">{{ translateWarehouse(inventoryItem.warehouse) }}</div>
               </div>
 
               <div class="info-item">
-                <div class="info-label">Status</div>
+                <div class="eyebrow">Status</div>
                 <div class="info-value">
                   <span :class="['badge', getStockStatusClass()]">
                     {{ getStockStatus() }}
@@ -159,13 +152,6 @@ const getStockStatusClass = () => {
   return 'success'
 }
 
-const getStockIconClass = () => {
-  const status = getStockStatus()
-  if (status === 'Low Stock') return 'danger-icon'
-  if (status === 'Adequate') return 'warning-icon'
-  return 'success-icon'
-}
-
 const getSummaryCardClass = () => {
   const status = getStockStatus()
   if (status === 'Low Stock') return 'danger-card'
@@ -177,24 +163,22 @@ const getSummaryCardClass = () => {
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgba(16, 20, 24, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--s4);
   z-index: 2000;
-  padding: 1rem;
 }
 
 .modal-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-  max-width: 700px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  box-shadow: var(--e-3);
   width: 100%;
+  max-width: 700px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
@@ -202,235 +186,163 @@ const getSummaryCardClass = () => {
 }
 
 .modal-header {
+  padding: var(--s5) var(--s6);
+  border-bottom: 1px solid var(--rule);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  gap: var(--s4);
 }
 
 .modal-title {
-  font-size: 1.25rem;
+  font-family: var(--display);
+  font-size: var(--t-lg);
   font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 
 .close-button {
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  color: var(--steel);
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-alt);
+  color: var(--ink);
 }
 
 .modal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
+  padding: var(--s6);
 }
 
 .item-header {
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 1.5rem;
-}
-
-.item-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-
-.item-icon.success-icon {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.item-icon.warning-icon {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-}
-
-.item-icon.danger-icon {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-bottom: var(--s5);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s5);
 }
 
 .item-title-section {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
 }
 
 .item-name {
-  font-size: 1.5rem;
+  font-family: var(--display);
+  font-size: var(--t-xl);
   font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.5rem 0;
-}
-
-.item-sku {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-family: 'Monaco', 'Courier New', monospace;
-}
-
-.stock-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  flex-shrink: 0;
-}
-
-.stock-badge.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.stock-badge.warning {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.stock-badge.danger {
-  background: #fecaca;
-  color: #991b1b;
+  color: var(--ink);
 }
 
 .stock-summary {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: var(--s4);
+  margin-bottom: var(--s6);
 }
 
 .summary-card {
-  padding: 1.25rem;
-  border-radius: 10px;
-  border: 2px solid;
-}
-
-.summary-card.primary {
-  border-color: #bfdbfe;
-  background: #eff6ff;
+  padding: var(--s4);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--rule-strong);
+  background: var(--surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
 }
 
 .summary-card.success-card {
-  border-color: #a7f3d0;
-  background: #d1fae5;
+  background: var(--mint-soft);
+  border-color: var(--mint);
 }
 
 .summary-card.warning-card {
-  border-color: #fed7aa;
-  background: #fffbeb;
+  background: var(--amber-soft);
+  border-color: var(--amber);
 }
 
 .summary-card.danger-card {
-  border-color: #fecaca;
-  background: #fef2f2;
-}
-
-.summary-label {
-  font-size: 0.813rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
-  margin-bottom: 0.5rem;
+  background: var(--signal-soft);
+  border-color: var(--signal);
 }
 
 .summary-value {
-  font-size: 1.875rem;
+  font-size: var(--t-2xl);
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .summary-subtitle {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-top: 0.25rem;
+  font-size: var(--t-sm);
+  color: var(--steel);
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  gap: var(--s5);
 }
 
 .info-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-.info-label {
-  font-size: 0.813rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
+  gap: var(--s2);
 }
 
 .info-value {
-  font-size: 0.938rem;
-  color: #0f172a;
+  font-size: var(--t-base);
+  color: var(--ink);
   font-weight: 500;
 }
 
 .info-value.total-value {
-  font-size: 1.125rem;
-  color: #2563eb;
+  font-size: var(--t-lg);
+  color: var(--ink);
   font-weight: 700;
 }
 
 .modal-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  padding: var(--s5) var(--s6);
+  border-top: 1px solid var(--rule);
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--s3);
 }
 
 .btn-secondary {
-  padding: 0.625rem 1.25rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  padding: 8px var(--s4);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--t-md);
   font-weight: 500;
-  font-size: 0.875rem;
-  color: #334155;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
+  transition: border-color 0.12s ease;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  border-color: var(--ink);
 }
 
-/* Modal transition animations */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.16s ease;
 }
 
 .modal-enter-from,
@@ -440,11 +352,11 @@ const getSummaryCardClass = () => {
 
 .modal-enter-active .modal-container,
 .modal-leave-active .modal-container {
-  transition: transform 0.2s ease;
+  transition: transform 0.16s ease;
 }
 
 .modal-enter-from .modal-container,
 .modal-leave-to .modal-container {
-  transform: scale(0.95);
+  transform: translateY(4px);
 }
 </style>

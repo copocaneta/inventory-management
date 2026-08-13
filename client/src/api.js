@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8001/api'
+const API_BASE_URL = 'http://localhost:8090/api'
 
 export const api = {
   async getInventory(filters = {}) {
@@ -40,6 +40,18 @@ export const api = {
 
   async getBacklog() {
     const response = await axios.get(`${API_BASE_URL}/backlog`)
+    return response.data
+  },
+
+  async getRestockOrders() {
+    const response = await axios.get(`${API_BASE_URL}/restock-orders`)
+    return response.data
+  },
+
+  // Sends SKUs and quantities only. The server resolves name, unit cost and lead
+  // time from the demand forecast, so prices are never client-supplied.
+  async createRestockOrder({ budget, items }) {
+    const response = await axios.post(`${API_BASE_URL}/restock-orders`, { budget, items })
     return response.data
   },
 
@@ -101,6 +113,16 @@ export const api = {
 
   async getPurchaseOrderByBacklogItem(backlogItemId) {
     const response = await axios.get(`${API_BASE_URL}/purchase-orders/${backlogItemId}`)
+    return response.data
+  },
+
+  async getQuarterlyReport() {
+    const response = await axios.get(`${API_BASE_URL}/reports/quarterly`)
+    return response.data
+  },
+
+  async getMonthlyTrends() {
+    const response = await axios.get(`${API_BASE_URL}/reports/monthly-trends`)
     return response.data
   }
 }

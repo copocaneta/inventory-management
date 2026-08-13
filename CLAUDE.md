@@ -18,16 +18,17 @@ Use the Task tool with these specialized subagents for appropriate tasks:
 
 ### Skills
 - **backend-api-test** skill: Use when writing or modifying tests in `tests/backend` directory with pytest and FastAPI TestClient
+- **saas-redesign** skill: Use when redesigning, restyling or modernizing the client UI, replacing the top nav with a left sidebar, or fixing inconsistent spacing/colors under `client/src`
 
 ### MCP Tools
 - **ALWAYS use GitHub MCP tools** (`mcp__github__*`) for ALL GitHub operations
   - Exception: Local branches only - use `git checkout -b` instead of `mcp__github__create_branch`
 - **ALWAYS use Playwright MCP tools** (`mcp__playwright__*`) for browser testing
-  - Test against: `http://localhost:3000` (frontend), `http://localhost:8001` (API)
+  - Test against: `http://localhost:3030` (frontend), `http://localhost:8090` (API)
 
 ## Stack
-- **Frontend**: Vue 3 + Composition API + Vite (port 3000)
-- **Backend**: Python FastAPI (port 8001)
+- **Frontend**: Vue 3 + Composition API + Vite (port 3030)
+- **Backend**: Python FastAPI (port 8090)
 - **Data**: JSON files in `server/data/` loaded via `server/mock_data.py`
 
 ## Quick Start

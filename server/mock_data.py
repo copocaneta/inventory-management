@@ -35,5 +35,10 @@ recent_transactions = load_json_file('transactions.json')
 # Load purchase orders
 purchase_orders = load_json_file('purchase_orders.json')
 
+# Load restock orders. Seeded from an empty JSON file and appended to in memory only:
+# POST /api/restock-orders never writes back to disk, so submitted restocks are
+# cleared on server restart. Keeps the repo's "no database, no tracked demo data" posture.
+restock_orders = load_json_file('restock_orders.json')
+
 # All data is now loaded from JSON files in the data/ directory
 # This allows for easier maintenance and updates of the sample data

@@ -1,0 +1,392 @@
+/*
+ * Catalyst Components — design system
+ *
+ * Direction: "warehouse floor". Identity comes from the subject — label stock,
+ * bin codes, steel and kraft. Amber is the single accent and appears at most
+ * twice per screen; red is reserved for shortfall figures only.
+ *
+ * Global class names (.card, .stat-card, .badge, .page-header, .table-container,
+ * bare table styles) are preserved from the previous App.vue style block so every
+ * view keeps rendering while it is restyled view by view.
+ */
+
+:root {
+  /* surface + text */
+  --ink: #101418;
+  --paper: #faf9f6;
+  --surface: #ffffff;
+  --surface-alt: #fcfbf8;
+  --steel: #5b6472;
+  --steel-soft: #8b939e;
+  --rule: #dfdcd5;
+  --rule-strong: #c7c3ba;
+
+  /* accent + status — amber accents, signal red for shortfall only */
+  --amber: #e8a33d;
+  --amber-soft: #fbf3e4;
+  --amber-ink: #8a5b14;
+  --signal: #c8452f;
+  --signal-soft: #fbeae6;
+  --mint: #3f8f6b;
+  --mint-soft: #e6f2ec;
+  --info: #3f6b8f;
+  --info-soft: #e6edf2;
+
+  /* spacing — 4px base */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+  --s10: 40px;
+  --s12: 56px;
+
+  /* radius — deliberately tight, this is label stock not soft UI */
+  --r-sm: 3px;
+  --r-md: 6px;
+
+  /* elevation — three steps, no more */
+  --e-1: 0 1px 2px rgba(16, 20, 24, 0.05);
+  --e-2: 0 4px 14px rgba(16, 20, 24, 0.08);
+  --e-3: 0 24px 56px rgba(16, 20, 24, 0.18);
+  --ring: 0 0 0 3px rgba(232, 163, 61, 0.28);
+
+  /* type */
+  --display: 'Archivo Narrow', Helvetica, Arial, sans-serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --t-xs: 10px;
+  --t-sm: 11.5px;
+  --t-md: 12.5px;
+  --t-base: 14px;
+  --t-lg: 16px;
+  --t-xl: 20px;
+  --t-2xl: 30px;
+
+  /* layout */
+  --sidebar-w: 248px;
+  --sidebar-w-rail: 64px;
+  --content-max: 1600px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--body);
+  font-size: var(--t-base);
+  line-height: 1.5;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------- shared type utilities ---------- */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel-soft);
+}
+
+/* Tabular numerals: figures must align down a column so a short count is
+   visible without reading a single label. */
+.num,
+.stat-value,
+.qty {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ---------- page header ---------- */
+
+.page-header {
+  margin-bottom: var(--s6);
+}
+
+/*
+ * .page-header now carries only the description paragraph — the shell renders
+ * the page title. The one h2 left in the tree is in views/Backlog.vue, which
+ * is not registered in the router and cannot be reached.
+ */
+.page-header p {
+  font-size: var(--t-md);
+  color: var(--steel);
+}
+
+/* ---------- section head ---------- */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.section-head h3 {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.section-note {
+  margin-left: auto;
+  font-size: var(--t-md);
+  color: var(--steel);
+}
+
+/* ---------- metrics strip ---------- */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--s6);
+}
+
+.stat-card {
+  padding: var(--s5);
+  border-right: 1px solid var(--rule);
+}
+
+.stat-card:last-child {
+  border-right: none;
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel-soft);
+  margin-bottom: var(--s3);
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.stat-card.warning .stat-value { color: var(--amber-ink); }
+.stat-card.success .stat-value { color: var(--mint); }
+.stat-card.danger .stat-value { color: var(--signal); }
+.stat-card.info .stat-value { color: var(--info); }
+
+/* ---------- card ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: var(--s5);
+  margin-bottom: var(--s6);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--s5);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.card-title {
+  font-family: var(--display);
+  font-size: var(--t-base);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* ---------- tables ---------- */
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: transparent;
+}
+
+th {
+  text-align: left;
+  padding: 10px var(--s4);
+  border-bottom: 1px solid var(--rule-strong);
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-soft);
+  white-space: nowrap;
+}
+
+td {
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-md);
+  color: var(--ink);
+}
+
+tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: var(--surface-alt);
+}
+
+/* Signature: a SKU is label stock. Mono code, dashed rule, location in its
+   own cell — the same treatment the shortage cards use, at table scale. */
+.cell-sku {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cell-sku b {
+  padding: 3px 7px;
+  background: var(--surface-alt);
+  font-family: var(--mono);
+  font-size: var(--t-md);
+  font-weight: 600;
+}
+
+.cell-sku span {
+  padding: 3px 7px;
+  border-left: 1px dashed var(--rule-strong);
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--steel);
+}
+
+.cell-name {
+  display: block;
+  margin-top: 5px;
+  font-size: var(--t-md);
+  color: var(--steel);
+}
+
+.qty {
+  font-size: var(--t-base);
+  font-weight: 600;
+}
+
+.qty.low {
+  color: var(--signal);
+}
+
+/* ---------- badges ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.badge.success,
+.badge.increasing { background: var(--mint-soft); color: var(--mint); }
+
+.badge.warning,
+.badge.medium { background: var(--amber-soft); color: var(--amber-ink); }
+
+.badge.danger,
+.badge.decreasing,
+.badge.high { background: var(--signal-soft); color: var(--signal); }
+
+.badge.info,
+.badge.stable,
+.badge.low { background: var(--info-soft); color: var(--info); }
+
+/* ---------- states ---------- */
+
+.loading {
+  padding: var(--s12) var(--s6);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: var(--t-md);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel-soft);
+}
+
+.error {
+  padding: var(--s4);
+  margin: var(--s4) 0;
+  background: var(--signal-soft);
+  border: 1px solid var(--signal);
+  border-radius: var(--r-sm);
+  color: var(--signal);
+  font-size: var(--t-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
