@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 ```bash
 # From client directory
 npm run dev
-# Runs on http://localhost:3000
+# Runs on http://localhost:3030
 ```
 
 ## Development Best Practices
@@ -353,7 +353,7 @@ watchDebounced(
 // api.js
 import axios from 'axios'
 
-const API_BASE = 'http://localhost:8001/api'
+const API_BASE = 'http://localhost:8090/api'
 
 export const api = {
   async getItems(filters) {

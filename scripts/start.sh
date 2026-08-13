@@ -33,7 +33,7 @@ if [ ! -d "$PROJECT_ROOT/client/node_modules" ]; then
 fi
 
 # Start backend server in background
-echo -e "${GREEN}Starting backend server on http://localhost:8001${NC}"
+echo -e "${GREEN}Starting backend server on http://localhost:8090${NC}"
 cd "$PROJECT_ROOT/server"
 uv run python3 main.py > /tmp/inventory-backend.log 2>&1 &
 BACKEND_PID=$!
@@ -42,7 +42,7 @@ BACKEND_PID=$!
 sleep 2
 
 # Start frontend server in background
-echo -e "${GREEN}Starting frontend server on http://localhost:3000${NC}"
+echo -e "${GREEN}Starting frontend server on http://localhost:3030${NC}"
 cd "$PROJECT_ROOT/client"
 npm run dev > /tmp/inventory-frontend.log 2>&1 &
 FRONTEND_PID=$!
@@ -51,9 +51,9 @@ FRONTEND_PID=$!
 sleep 2
 
 echo -e "\n${GREEN}✓ Application started successfully!${NC}"
-echo -e "${BLUE}Frontend:${NC} http://localhost:3000"
-echo -e "${BLUE}Backend API:${NC} http://localhost:8001"
-echo -e "${BLUE}API Docs:${NC} http://localhost:8001/docs"
+echo -e "${BLUE}Frontend:${NC} http://localhost:3030"
+echo -e "${BLUE}Backend API:${NC} http://localhost:8090"
+echo -e "${BLUE}API Docs:${NC} http://localhost:8090/docs"
 echo -e "\n${YELLOW}Logs:${NC}"
 echo -e "  Backend: /tmp/inventory-backend.log"
 echo -e "  Frontend: /tmp/inventory-frontend.log"
