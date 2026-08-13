@@ -6,8 +6,47 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充発注',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充発注',
+    description: '予算を設定し、その範囲で発注できる需要予測品目を注文します。',
+    budget: {
+      label: '利用可能予算',
+      allocated: '割当額',
+      remaining: '残額',
+      selectedItems: '選択品目数',
+      coversAll: 'すべての需要予測品目を対象にできます'
+    },
+    table: {
+      title: '補充推奨品目',
+      include: '選択',
+      sku: 'SKU',
+      itemName: '品目名',
+      trend: '傾向',
+      forecastedDemand: '予測需要（30日）',
+      gap: '需要差分',
+      quantity: '発注数量',
+      unitCost: '単価',
+      lineCost: '小計',
+      leadTime: 'リードタイム'
+    },
+    overBudget: '予算超過',
+    recommended: '推奨',
+    days: '{count}日',
+    placeOrder: '発注する',
+    placingOrder: '発注処理中...',
+    nothingSelected: '発注するには品目を1つ以上選択してください',
+    success: {
+      title: '補充発注 {number} を送信しました',
+      detail: '{count}品目、{total}、到着予定 {date}',
+      viewInOrders: '注文タブで表示'
+    },
+    error: '補充発注の送信に失敗しました'
   },
 
   // Dashboard
@@ -106,6 +145,18 @@ export default {
     title: '注文',
     description: '顧客注文の表示と管理',
     allOrders: 'すべての注文',
+    submittedOrders: '送信済み補充発注',
+    submittedOrdersEmpty: '送信済みの補充発注はありません。補充発注タブで予算を設定して発注してください。',
+    submittedTable: {
+      restockNumber: '補充発注番号',
+      items: '品目',
+      totalCost: '合計金額',
+      submitted: '送信日',
+      leadTime: 'リードタイム',
+      expectedDelivery: '到着予定日',
+      status: 'ステータス'
+    },
+    leadTimeDays: '{count}日',
     totalOrders: '総注文数',
     totalRevenue: '総収益',
     avgOrderValue: '平均注文額',
@@ -204,6 +255,7 @@ export default {
     shipped: '出荷済み',
     processing: '処理中',
     backordered: 'バックオーダー',
+    submitted: '送信済み',
     inStock: '在庫あり',
     lowStock: '在庫僅少',
     adequate: '適量'
