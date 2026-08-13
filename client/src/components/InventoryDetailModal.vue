@@ -74,7 +74,7 @@
 
               <div class="info-item">
                 <div class="eyebrow">Warehouse</div>
-                <div class="info-value">{{ translateWarehouse(inventoryItem.location) }}</div>
+                <div class="info-value">{{ translateWarehouse(inventoryItem.warehouse) }}</div>
               </div>
 
               <div class="info-item">

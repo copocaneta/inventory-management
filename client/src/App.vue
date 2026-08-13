@@ -480,6 +480,20 @@ export default {
   display: none;
 }
 
+/* In the rail the wordmark has nowhere to go, so it reduces to the amber tick
+   from .brand-mark::before. font-size:0 drops the text without dropping the
+   pseudo-element, which carries its own width and height. */
+.is-collapsed .brand {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.is-collapsed .brand-mark {
+  font-size: 0;
+  gap: 0;
+}
+
 .page-hamburger {
   display: none;
   align-items: center;
@@ -514,6 +528,17 @@ export default {
   .brand-sub,
   .nav-group-label {
     display: none;
+  }
+
+  .brand {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .brand-mark {
+    font-size: 0;
+    gap: 0;
   }
 
   .collapse-toggle {

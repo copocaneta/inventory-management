@@ -54,7 +54,7 @@
                 @click="showItemDetail(item)"
               >
                 <td>
-                  <span class="cell-sku"><b>{{ item.sku }}</b><span>{{ translateWarehouse(item.location) }}</span></span>
+                  <span class="cell-sku"><b>{{ item.sku }}</b><span>{{ item.location }}</span></span>
                   <span class="cell-name">{{ translateProductName(item.name) }}</span>
                 </td>
                 <td>{{ translateCategory(item.category) }}</td>

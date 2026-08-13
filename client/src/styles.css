@@ -138,16 +138,10 @@ button {
 }
 
 /*
- * The shell (App.vue) now renders the page title, so a view's own h2 is a
- * duplicate heading. Views are being migrated one at a time — Dashboard has
- * already dropped its .page-header outright. Until the rest follow, hide the
- * duplicate h2 but keep the description paragraph, which still carries content
- * the shell does not show. Delete this rule once no view renders .page-header.
+ * .page-header now carries only the description paragraph — the shell renders
+ * the page title. The one h2 left in the tree is in views/Backlog.vue, which
+ * is not registered in the router and cannot be reached.
  */
-.page-header h2 {
-  display: none;
-}
-
 .page-header p {
   font-size: var(--t-md);
   color: var(--steel);
