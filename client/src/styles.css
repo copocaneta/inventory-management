@@ -137,15 +137,15 @@ button {
   margin-bottom: var(--s6);
 }
 
+/*
+ * The shell (App.vue) now renders the page title, so a view's own h2 is a
+ * duplicate heading. Views are being migrated one at a time — Dashboard has
+ * already dropped its .page-header outright. Until the rest follow, hide the
+ * duplicate h2 but keep the description paragraph, which still carries content
+ * the shell does not show. Delete this rule once no view renders .page-header.
+ */
 .page-header h2 {
-  font-family: var(--display);
-  font-size: var(--t-2xl);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.005em;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin-bottom: var(--s2);
+  display: none;
 }
 
 .page-header p {
